@@ -12,7 +12,7 @@ ALTER TABLE %s RENAME TO %s_old;\n\
 \n\
 %s;\n\
 \n\
-INSERT INTO %s SELECT * FROM %s_old;\n\
+INSERT INTO %s SELECT * FROM %s_old ORDER BY rowid;\n\
 DROP TABLE %s_old;\n\
 \n"
 

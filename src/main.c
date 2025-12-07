@@ -42,16 +42,16 @@ database file is `./app.db`. You can change it with the `--database` option.\n\
 yet, and will execute every migrations from the migrations directory that are not\n\
 already referenced in this table, in alphabetical order. It will save the previous\n\
 database as `<db name>.prev`, and if the migration fails, it will restore that\n\
-previous database, and save the failed one as `<db name>.failed`. Then it will dump\n\
-the current structure in the structure file, which is `./structure.sql` by default,\n\
-and can be changed with the `--structure` option.\n\
+previous database, and save the failed one as `<db name>.failed`. In case of success,\n\
+it will dump the current structure in the structure file, which is `./structure.sql`\n\
+by default, and can be changed with the `--structure` option.\n\
 \n\
 A migration file can either be a SQL file, or an executable. Executable will be\n\
 executed once, provided they return a 0 status. Non zero status will be considered\n\
 as a failure at applying the migration. The point of running those executables is\n\
 to allow your migration to compute data changes, rather than hardcoding them. Your\n\
 executable will be passed the database path as first parameter, but beside that,\n\
-you're own your own. It's your responsibility to make that executable connect to\n\
+you're on your own. It's your responsibility to make that executable connect to\n\
 the database and do whatever it wants with it.\n\
 \n\
 Options can be:\n\

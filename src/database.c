@@ -10,7 +10,7 @@ sqlite3 *db = NULL;
  *
  * This query should have no bind parameter and you don't get result rows.
  */
-static int
+int
 db_exec (const char *query)
 {
   int err = 0;
@@ -21,7 +21,7 @@ db_exec (const char *query)
   if (rc != SQLITE_OK)
     {
       err = 1;
-      fprintf(stderr, "database.c: db_exec() : SQL error: %s\n", sql_err);
+      fprintf(stderr, "database.c: db_exec(): SQL error: %s\n", sql_err);
       goto teardown;
     }
 
@@ -43,7 +43,7 @@ open_db (const char db_file[static 1])
   err = sqlite3_open (db_file, &db);
   if (err)
     {
-      fprintf (stderr, "database.c: open_db() : can't open database %s\n", db_file);
+      fprintf (stderr, "database.c: open_db(): can't open database %s\n", db_file);
       return err;
     }
   sqlite3_busy_timeout (db, 5000);
@@ -66,4 +66,64 @@ void
 close_db ()
 {
   if (db) sqlite3_close (db);
+}
+
+int
+backup_db (const char src[MAX_PATH_LEN], const char dest[MAX_PATH_LEN])
+{
+  int err = 0;
+
+  sqlite3 *src_db = NULL;
+  sqlite3 *dest_db = NULL;
+
+  err = sqlite3_open (src, &src_db);
+  if (err)
+    {
+      fprintf (stderr, "database.c: backup_db(): can't open database %s\n", src);
+      goto teardown;
+    }
+  sqlite3_busy_timeout (src_db, 5000);
+
+  err = sqlite3_open (dest, &dest_db);
+  if (err)
+    {
+      fprintf (stderr, "database.c: backup_db(): can't open database %s\n", dest);
+      goto teardown;
+    }
+  sqlite3_busy_timeout (dest_db, 5000);
+
+  sqlite3_backup *run = sqlite3_backup_init (dest_db, "main", src_db, "main");
+  if (!run)
+    {
+      err = 1;
+      fprintf (stderr, "database.c: backup_db(): can't initiate backup or restore operation.\n");
+      goto teardown;
+    }
+
+  while (1)
+    {
+      int s = sqlite3_backup_step (run, -1);
+      if (s == SQLITE_OK)
+        continue;
+      else if (s == SQLITE_DONE)
+        break;
+      else
+        {
+          err = 1;
+          fprintf (stderr, "database.c: backup_db(): error while performing query: %s\n", sqlite3_errmsg (dest_db));
+          goto teardown;
+        }
+    }
+
+  err = sqlite3_backup_finish (run);
+  if (err)
+    {
+      fprintf (stderr, "database.c: backup_db(): can't finish backup or restore operation.\n");
+      goto teardown;
+    }
+
+  teardown:
+  if (src_db) sqlite3_close (src_db);
+  if (dest_db) sqlite3_close (dest_db);
+  return err;
 }

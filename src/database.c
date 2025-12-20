@@ -1,9 +1,59 @@
 #include <sqlite3.h>
 #include <stdio.h>
+#include <stdlib.h>
 
+#include "database.h"
 #include "main.h"
 
 sqlite3 *db = NULL;
+
+static int
+exec_init (const char init_path[MAX_PATH_LEN])
+{
+  int err = 0;
+  FILE *file = NULL;
+  char *sql = NULL;
+
+  file = fopen (init_path, "r");
+  if (!file)
+    {
+      err = 1;
+      fprintf (stderr, "database.c: exec_init(): can't read init file.\n");
+      goto teardown;
+    }
+
+  fseek (file, 0, SEEK_END);
+  long size = ftell (file);
+  fseek (file, 0, SEEK_SET);
+
+  sql = calloc (1, size + 1);
+  if (!sql)
+    {
+      err = 1;
+      fprintf (stderr, "database.c: exec_init(): out of memory.\n");
+      goto teardown;
+    }
+
+  size_t read = fread (sql, 1, size, file);
+  if (read != (size_t) size)
+    {
+      err = 1;
+      fprintf (stderr, "database.c: exec_init(): could not read the whole init file: %s\n", init_path);
+      goto teardown;
+    }
+
+  err = db_exec (sql);
+  if (err)
+    {
+      fprintf (stderr, "database.c: exec_init(): could not execute SQL from init file: %s\n", init_path);
+      goto teardown;
+    }
+
+  teardown:
+  if (file) fclose (file);
+  if (sql) free (sql);
+  return err;
+}
 
 /*
  * Executes a simple query.
@@ -36,7 +86,7 @@ db_exec (const char *query)
  * TODO the pragmas here should come from the defaults set in config file.
  */
 int
-open_db (const char db_file[static 1])
+open_db (const char db_file[MAX_PATH_LEN], const char init_path[MAX_PATH_LEN])
 {
   int err = 0;
 
@@ -44,21 +94,22 @@ open_db (const char db_file[static 1])
   if (err)
     {
       fprintf (stderr, "database.c: open_db(): can't open database %s\n", db_file);
-      return err;
+      goto teardown;
     }
+
   sqlite3_busy_timeout (db, 5000);
 
-  db_exec ("PRAGMA journal_mode = WAL");
-  db_exec ("PRAGMA auto_vacuum = INCREMENTAL");
-  db_exec ("PRAGMA synchronous = NORMAL");
-  db_exec ("PRAGMA journal_size_limit = 27103364");
-  db_exec ("PRAGMA page_size = 8192");
-  db_exec ("PRAGMA cache_size = 2000");
-  db_exec ("PRAGMA foreign_keys = ON");
-  db_exec ("PRAGMA mmap_size = 2147483648");
-  db_exec ("PRAGMA temp_store = MEMORY");
-  db_exec ("PRAGMA busy_timeout = 5000");
+  if (init_path[0] != 0)
+    {
+      err = exec_init (init_path);
+      if (err)
+        {
+          fprintf (stderr, "database.c: open_db(): can't initialize connection.\n");
+          goto teardown;
+        }
+    }
 
+  teardown:
   return err;
 }
 
@@ -69,10 +120,10 @@ close_db ()
 }
 
 int
-reopen_db (const char db_file[static 1])
+reopen_db (const char db_file[MAX_PATH_LEN], const char init_path[MAX_PATH_LEN])
 {
   close_db ();
-  return open_db (db_file);
+  return open_db (db_file, init_path);
 }
 
 int

@@ -534,14 +534,14 @@ recreate_table_migration (char **content, const char table_name[MAX_NAME_LEN])
   err = add_to_string (content, pragmas, MAX_FILE_LEN);
   if (err)
     {
-      fprintf (stderr, "generate/generate_migration.c: raw_migration(): can't add pragmas.\n");
+      fprintf (stderr, "generate/generate_migration.c: recreate_table_migration(): can't add pragmas.\n");
       goto teardown;
     }
 
   err = find_table_sql (&table_sql, table_name);
   if (err)
     {
-      fprintf (stderr, "generate/generate_migration.c: raw_migration(): can't retrieve table's SQL code.\n");
+      fprintf (stderr, "generate/generate_migration.c: recreate_table_migration(): can't retrieve table's SQL code.\n");
       goto teardown;
     }
 
@@ -549,7 +549,7 @@ recreate_table_migration (char **content, const char table_name[MAX_NAME_LEN])
   err = find_triggers (&triggers, table_name, &triggers_len);
   if (err)
     {
-      fprintf (stderr, "generate/generate_migration.c: raw_migration(): can't retrieve triggers.\n");
+      fprintf (stderr, "generate/generate_migration.c: recreate_table_migration(): can't retrieve triggers.\n");
       goto teardown;
     }
 
@@ -557,7 +557,7 @@ recreate_table_migration (char **content, const char table_name[MAX_NAME_LEN])
   err = find_views (&views, table_name, &views_len);
   if (err)
     {
-      fprintf (stderr, "generate/generate_migration.c: raw_migration(): can't retrieve views.\n");
+      fprintf (stderr, "generate/generate_migration.c: recreate_table_migration(): can't retrieve views.\n");
       goto teardown;
     }
 
@@ -565,28 +565,28 @@ recreate_table_migration (char **content, const char table_name[MAX_NAME_LEN])
   err = find_indexes (&indexes, table_name, &indexes_len);
   if (err)
     {
-      fprintf (stderr, "generate/generate_migration.c: raw_migration(): can't retrieve indexes.\n");
+      fprintf (stderr, "generate/generate_migration.c: recreate_table_migration(): can't retrieve indexes.\n");
       goto teardown;
     }
 
   err = write_drop_objects (content, triggers, triggers_len, views, views_len, indexes, indexes_len);
   if (err)
     {
-      fprintf (stderr, "generate/generate_migration.c: raw_migration(): can't write drop statements.\n");
+      fprintf (stderr, "generate/generate_migration.c: recreate_table_migration(): can't write drop statements.\n");
       goto teardown;
     }
 
   err = write_table_rotation (content, table_sql, table_name);
   if (err)
     {
-      fprintf (stderr, "generate/generate_migration.c: raw_migration(): can't write table rotation statements.\n");
+      fprintf (stderr, "generate/generate_migration.c: recreate_table_migration(): can't write table rotation statements.\n");
       goto teardown;
     }
 
   err = write_recreate_objects (content, triggers, triggers_len, views, views_len, indexes, indexes_len);
   if (err)
     {
-      fprintf (stderr, "generate/generate_migration.c: raw_migration(): can't write dropped objects recreation statements.\n");
+      fprintf (stderr, "generate/generate_migration.c: recreate_table_migration(): can't write dropped objects recreation statements.\n");
       goto teardown;
     }
 
@@ -605,7 +605,7 @@ raw_migration (char **content)
 
   const char *raw_content = "-- Your SQL\n";
 
-  *content = realloc (*content, strnlen (*content, MAX_FILE_LEN) + strlen (raw_content) + 1);
+  *content = calloc (1, strlen (raw_content) + 1);
   if (!*content)
     {
       err = 1;
@@ -613,7 +613,7 @@ raw_migration (char **content)
       goto teardown;
     }
 
-  snprintf (*content + strnlen (*content, MAX_FILE_LEN), strlen (raw_content), "%s", raw_content);
+  snprintf (*content, strlen (raw_content) + 1, "%s", raw_content);
 
   teardown:
   return err;
@@ -664,7 +664,7 @@ generate_migration (options_t *options)
 
   if (options->recreate[0] != 0)
     {
-      err = open_db (options->database);
+      err = open_db (options->database, options->init);
       if (err)
         {
           fprintf (stderr, "generate/generate_migration.c: generate_migration(): can't open database.\n");

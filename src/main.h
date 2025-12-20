@@ -10,6 +10,7 @@ typedef struct {
   char database[MAX_PATH_LEN];
   char migrations[MAX_PATH_LEN];
   char structure[MAX_PATH_LEN];
+  char init[MAX_PATH_LEN];
   char recreate[MAX_NAME_LEN];
   char migration_name[MAX_NAME_LEN];
   int command;

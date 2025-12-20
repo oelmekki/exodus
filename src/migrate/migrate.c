@@ -243,7 +243,7 @@ migrate (options_t *options)
       goto teardown;
     }
 
-  err = open_db (options->database);
+  err = open_db (options->database, options->init);
   if (err)
     {
       fprintf (stderr, "migrate/migrate.c: migrate(): can't open database.\n");
@@ -315,7 +315,7 @@ migrate (options_t *options)
         }
 
       // Each migration may have set its own PRAGMAs, so let's reset to a clean state.
-      err = reopen_db (options->database);
+      err = reopen_db (options->database, options->init);
       if (err)
         {
           fprintf (stderr, "migrate/migrate.c: migrate(): can't reopen database.\n");

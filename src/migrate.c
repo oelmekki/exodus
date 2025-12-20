@@ -241,7 +241,7 @@ migrate (options_t *options)
   char fail_file[MAX_PATH_LEN] = {0};
 
   int written = snprintf (backup_file, MAX_PATH_LEN, "%s.prev", options->database);
-  if (written > MAX_PATH_LEN)
+  if (written >= MAX_PATH_LEN)
     {
       err = 1;
       fprintf (stderr, "migrate.c: migrate(): truncated backup database file path:%s\n", backup_file);
@@ -249,7 +249,7 @@ migrate (options_t *options)
     }
 
   written = snprintf (fail_file, MAX_PATH_LEN, "%s.fail", options->database);
-  if (written > MAX_PATH_LEN)
+  if (written >= MAX_PATH_LEN)
     {
       err = 1;
       fprintf (stderr, "migrate.c: migrate(): truncated fail database file path:%s\n", fail_file);
@@ -289,7 +289,7 @@ migrate (options_t *options)
       const char *migration_file = migration_files[i]->d_name;
       char migration_path[MAX_PATH_LEN] = {0};
       int written = snprintf (migration_path, MAX_PATH_LEN, "%s/%s", options->migrations, migration_file);
-      if (written > MAX_PATH_LEN)
+      if (written >= MAX_PATH_LEN)
         {
           should_restore_db = true;
           fprintf (stderr, "migrate.c: migrate(): truncated migration path: %s\n", migration_path);

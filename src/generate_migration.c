@@ -46,7 +46,7 @@ add_to_string (char *content[static 1], const char adding[static 1], size_t tota
 
   size_t left = total_max - content_len;
   int written = snprintf (*content + content_len, left, "%s", adding);
-  if (written < 0 || (size_t) written >= left)
+  if ((size_t) written >= left)
     {
       err = 1;
       fprintf (stderr, "generate_migration.c: add_to_string(): max migration file length exceeded on adding.\n");
@@ -94,7 +94,7 @@ generate_filename (char filename[MAX_PATH_LEN], options_t *options)
   time_t timestamp = time (NULL);
 
   int written = snprintf (filename, MAX_PATH_LEN - 1, "%s/%ld-%s.sql", options->migrations, timestamp, options->migration_name);
-  if (written > MAX_PATH_LEN - 1)
+  if (written >= MAX_PATH_LEN - 1)
     {
       err = 1;
       fprintf (stderr, "generate_migration.c: generate_filename(): filename too long, truncated: %s\n", filename);
@@ -405,7 +405,7 @@ write_drop_objects (char **content, database_object_t *triggers, size_t triggers
     {
       char drop_statement[MAX_OBJECT_LEN] = {0};
       int written = snprintf (drop_statement, MAX_OBJECT_LEN, "DROP TRIGGER IF EXISTS %s;\n", triggers[i].name);
-      if (written > MAX_OBJECT_LEN)
+      if (written >= MAX_OBJECT_LEN)
         {
           err = 1;
           fprintf (stderr, "generate_migration.c: write_drop_objects(): truncated trigger's drop statement.\n");
@@ -423,7 +423,7 @@ write_drop_objects (char **content, database_object_t *triggers, size_t triggers
     {
       char drop_statement[MAX_OBJECT_LEN] = {0};
       int written = snprintf (drop_statement, MAX_OBJECT_LEN, "DROP VIEW IF EXISTS %s;\n", views[i].name);
-      if (written > MAX_OBJECT_LEN)
+      if (written >= MAX_OBJECT_LEN)
         {
           err = 1;
           fprintf (stderr, "generate_migration.c: write_drop_objects(): truncated view's drop statement.\n");
@@ -441,7 +441,7 @@ write_drop_objects (char **content, database_object_t *triggers, size_t triggers
     {
       char drop_statement[MAX_OBJECT_LEN] = {0};
       int written = snprintf (drop_statement, MAX_OBJECT_LEN, "DROP INDEX IF EXISTS %s;\n", indexes[i].name);
-      if (written > MAX_OBJECT_LEN)
+      if (written >= MAX_OBJECT_LEN)
         {
           err = 1;
           fprintf (stderr, "generate_migration.c: write_drop_objects(): truncated index' drop statement.\n");
@@ -466,7 +466,7 @@ write_table_rotation (char **content, const char table_sql[static 1], const char
 
   char rotation_statement[MAX_OBJECT_LEN] = {0};
   int written = snprintf (rotation_statement, MAX_OBJECT_LEN, ROTATE_TEMPLATE, table_name, table_name, table_sql, table_name, table_name, table_name);
-  if (written > MAX_OBJECT_LEN)
+  if (written >= MAX_OBJECT_LEN)
     {
       err = 1;
       fprintf (stderr, "generate_migration.c: write_table_rotation(): rotation SQL too long.\n");
@@ -493,7 +493,7 @@ write_recreate_objects (char **content, database_object_t *triggers, size_t trig
     {
       char create_statement[MAX_OBJECT_LEN] = {0};
       int written = snprintf (create_statement, MAX_OBJECT_LEN, "%s;\n\n", triggers[i].sql);
-      if (written > MAX_OBJECT_LEN)
+      if (written >= MAX_OBJECT_LEN)
         {
           err = 1;
           fprintf (stderr, "generate_migration.c: write_recreate_objects(): truncated trigger's drop statement.\n");
@@ -511,7 +511,7 @@ write_recreate_objects (char **content, database_object_t *triggers, size_t trig
     {
       char create_statement[MAX_OBJECT_LEN] = {0};
       int written = snprintf (create_statement, MAX_OBJECT_LEN, "%s;\n\n", views[i].sql);
-      if (written > MAX_OBJECT_LEN)
+      if (written >= MAX_OBJECT_LEN)
         {
           err = 1;
           fprintf (stderr, "generate_migration.c: write_recreate_objects(): truncated view's drop statement.\n");
@@ -529,7 +529,7 @@ write_recreate_objects (char **content, database_object_t *triggers, size_t trig
     {
       char create_statement[MAX_OBJECT_LEN] = {0};
       int written = snprintf (create_statement, MAX_OBJECT_LEN, "%s;\n\n", indexes[i].sql);
-      if (written > MAX_OBJECT_LEN)
+      if (written >= MAX_OBJECT_LEN)
         {
           err = 1;
           fprintf (stderr, "generate_migration.c: write_recreate_objects(): truncated index' drop statement.\n");

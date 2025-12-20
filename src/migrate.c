@@ -43,7 +43,13 @@ find_last_migration_applied ()
       goto teardown;
     }
 
-  sqlite3_prepare_v2 (db, query, -1, &stmt, NULL);
+  int rc = sqlite3_prepare_v2 (db, query, -1, &stmt, NULL);
+  if (rc != SQLITE_OK)
+    {
+      err = 1;
+      fprintf (stderr, "migrate.c: find_last_migration_applied(): error while preparing query: %s\n", sqlite3_errmsg (db));
+      goto teardown;
+    }
 
   while (1)
     {
@@ -192,7 +198,14 @@ append_name_in_migrations_table (const char migration_file[MAX_NAME_LEN])
   sqlite3_stmt *stmt = NULL;
   char query[BUFSIZ] = "INSERT INTO migrations(name) VALUES (?)";
 
-  sqlite3_prepare_v2 (db, query, -1, &stmt, NULL);
+  int rc = sqlite3_prepare_v2 (db, query, -1, &stmt, NULL);
+  if (rc != SQLITE_OK)
+    {
+      err = 1;
+      fprintf (stderr, "migrate.c: append_name_in_migrations_table(): error while preparing query: %s\n", sqlite3_errmsg (db));
+      goto teardown;
+    }
+
   sqlite3_bind_text (stmt, 1, migration_file, -1, NULL);
 
   while (1)
@@ -285,7 +298,7 @@ migrate (options_t *options)
 
       printf ("Applying migration %s…\n", migration_path);
 
-      if (strncmp (migration_file + strnlen (migration_file, MAX_PATH_LEN) - 4, ".sql", MAX_PATH_LEN) == 0)
+      if (strnlen (migration_file, MAX_PATH_LEN) > 4 && strncmp (migration_file + strnlen (migration_file, MAX_PATH_LEN) - 4, ".sql", MAX_PATH_LEN) == 0)
         {
           err = apply_sql_migration (migration_path);
           if (err)

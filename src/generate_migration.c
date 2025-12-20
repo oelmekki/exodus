@@ -112,7 +112,14 @@ find_table_sql (char *sql[static 1], const char table_name[MAX_NAME_LEN])
   sqlite3_stmt *stmt = NULL;
   char query[BUFSIZ] = "SELECT sql FROM sqlite_master WHERE type='table' AND name = ?";
 
-  sqlite3_prepare_v2 (db, query, -1, &stmt, NULL);
+  int rc = sqlite3_prepare_v2 (db, query, -1, &stmt, NULL);
+  if (rc != SQLITE_OK)
+    {
+      err = 1;
+      fprintf (stderr, "generate_migration.c: find_table_sql(): error while preparing query : %s\n", sqlite3_errmsg (db));
+      goto teardown;
+    }
+
   sqlite3_bind_text (stmt, 1, table_name, -1, NULL);
 
   while (1)
@@ -175,7 +182,14 @@ find_triggers (database_object_t **triggers, const char table_name[MAX_NAME_LEN]
   snprintf (pattern_2, MAX_NAME_LEN + 4, "%% %s(%%", table_name);
   snprintf (pattern_3, MAX_NAME_LEN + 4, "%% %s\n%%", table_name);
 
-  sqlite3_prepare_v2 (db, query, -1, &stmt, NULL);
+  int rc = sqlite3_prepare_v2 (db, query, -1, &stmt, NULL);
+  if (rc != SQLITE_OK)
+    {
+      err = 1;
+      fprintf (stderr, "generate_migration.c: find_triggers(): error while preparing query: %s\n", sqlite3_errmsg (db));
+      goto teardown;
+    }
+
   sqlite3_bind_text (stmt, 1, pattern_1, -1, NULL);
   sqlite3_bind_text (stmt, 2, pattern_2, -1, NULL);
   sqlite3_bind_text (stmt, 3, pattern_3, -1, NULL);
@@ -244,7 +258,14 @@ find_views (database_object_t **views, const char table_name[MAX_NAME_LEN], size
   snprintf (pattern_2, MAX_NAME_LEN + 4, "%% %s(%%", table_name);
   snprintf (pattern_3, MAX_NAME_LEN + 4, "%% %s\n%%", table_name);
 
-  sqlite3_prepare_v2 (db, query, -1, &stmt, NULL);
+  int rc = sqlite3_prepare_v2 (db, query, -1, &stmt, NULL);
+  if (rc != SQLITE_OK)
+    {
+      err = 1;
+      fprintf (stderr, "generate_migration.c: find_views(): error while preparing query: %s\n", sqlite3_errmsg (db));
+      goto teardown;
+    }
+
   sqlite3_bind_text (stmt, 1, pattern_1, -1, NULL);
   sqlite3_bind_text (stmt, 2, pattern_2, -1, NULL);
   sqlite3_bind_text (stmt, 3, pattern_3, -1, NULL);
@@ -313,7 +334,14 @@ find_indexes (database_object_t **indexes, const char table_name[MAX_NAME_LEN], 
   snprintf (pattern_2, MAX_NAME_LEN + 4, "%% %s(%%", table_name);
   snprintf (pattern_3, MAX_NAME_LEN + 4, "%% %s\n%%", table_name);
 
-  sqlite3_prepare_v2 (db, query, -1, &stmt, NULL);
+  int rc = sqlite3_prepare_v2 (db, query, -1, &stmt, NULL);
+  if (rc != SQLITE_OK)
+    {
+      err = 1;
+      fprintf (stderr, "generate_migration.c: find_indexes(): error while preparing query: %s\n", sqlite3_errmsg (db));
+      goto teardown;
+    }
+
   sqlite3_bind_text (stmt, 1, pattern_1, -1, NULL);
   sqlite3_bind_text (stmt, 2, pattern_2, -1, NULL);
   sqlite3_bind_text (stmt, 3, pattern_3, -1, NULL);

@@ -69,6 +69,13 @@ close_db ()
 }
 
 int
+reopen_db (const char db_file[static 1])
+{
+  close_db ();
+  return open_db (db_file);
+}
+
+int
 backup_db (const char src[MAX_PATH_LEN], const char dest[MAX_PATH_LEN])
 {
   int err = 0;

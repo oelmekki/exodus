@@ -6,8 +6,8 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-#include "../main.h"
-#include "../database.h"
+#include "main.h"
+#include "database.h"
 
 extern char **environ;
 
@@ -19,7 +19,7 @@ is_executable (const char migration_file[MAX_PATH_LEN])
   struct stat st;
   if (stat (migration_file, &st) != 0)
     {
-      fprintf (stderr, "migrate/migrate.c: migration file does not exist or is not readable: %s\n", migration_file);
+      fprintf (stderr, "migrate.c: migration file does not exist or is not readable: %s\n", migration_file);
       return false;
     }
 
@@ -39,7 +39,7 @@ find_last_migration_applied ()
   err = db_exec ("CREATE TABLE IF NOT EXISTS migrations(name TEXT NOT NULL)");
   if (err)
     {
-      fprintf (stderr, "migrate/migrate.c: find_last_migration_table(): can't create migrations table.\n");
+      fprintf (stderr, "migrate.c: find_last_migration_table(): can't create migrations table.\n");
       goto teardown;
     }
 
@@ -58,7 +58,7 @@ find_last_migration_applied ()
       else
         {
           err = 1;
-          fprintf (stderr, "migrate/migrate.c: find_last_migration_applied(): error while performing query: %s\n", sqlite3_errmsg (db));
+          fprintf (stderr, "migrate.c: find_last_migration_applied(): error while performing query: %s\n", sqlite3_errmsg (db));
           goto teardown;
         }
     }
@@ -86,7 +86,7 @@ find_migration_files (const char migrations_dir[MAX_PATH_LEN], struct dirent ***
   if (len == -1)
     {
       err = 1;
-      fprintf (stderr, "migrate/migrate.c: find_migration_files(): can't scan migrations directory.\n");
+      fprintf (stderr, "migrate.c: find_migration_files(): can't scan migrations directory.\n");
       goto teardown;
     }
 
@@ -107,7 +107,7 @@ apply_sql_migration (const char migration_file[MAX_PATH_LEN])
   if (!file)
     {
       err = 1;
-      fprintf (stderr, "migrate/migrate.c: apply_sql_migration(): can't open migration file: %s\n", migration_file);
+      fprintf (stderr, "migrate.c: apply_sql_migration(): can't open migration file: %s\n", migration_file);
       goto teardown;
     }
 
@@ -119,7 +119,7 @@ apply_sql_migration (const char migration_file[MAX_PATH_LEN])
   if (!sql)
     {
       err = 1;
-      fprintf (stderr, "migrate/migrate.c: apply_sql_migration(): out of memory.\n");
+      fprintf (stderr, "migrate.c: apply_sql_migration(): out of memory.\n");
       goto teardown;
     }
 
@@ -127,14 +127,14 @@ apply_sql_migration (const char migration_file[MAX_PATH_LEN])
   if (read != (size_t) size)
     {
       err = 1;
-      fprintf (stderr, "migrate/migrate.c: apply_sql_migration(): could not read the whole migration file: %s\n", migration_file);
+      fprintf (stderr, "migrate.c: apply_sql_migration(): could not read the whole migration file: %s\n", migration_file);
       goto teardown;
     }
 
   err = db_exec (sql);
   if (err)
     {
-      fprintf (stderr, "migrate/migrate.c: apply_sql_migration(): could not execute migration: %s\n", migration_file);
+      fprintf (stderr, "migrate.c: apply_sql_migration(): could not execute migration: %s\n", migration_file);
       goto teardown;
     }
 
@@ -153,7 +153,7 @@ apply_executable_migration (const char migration_file[MAX_PATH_LEN], const char 
   if (pid < 0)
     {
       err = 1;
-      fprintf (stderr, "migrate/migrate.c: apply_executable_migration(): can't fork to execute migration %s\n", migration_file);
+      fprintf (stderr, "migrate.c: apply_executable_migration(): can't fork to execute migration %s\n", migration_file);
       goto teardown;
     }
 
@@ -170,14 +170,14 @@ apply_executable_migration (const char migration_file[MAX_PATH_LEN], const char 
   if (WIFSIGNALED (status))
     {
       err = 1;
-      fprintf (stderr, "migrate/migrate.c: apply_executable_migration(): migration executable was killed: %s\n", migration_file);
+      fprintf (stderr, "migrate.c: apply_executable_migration(): migration executable was killed: %s\n", migration_file);
       goto teardown;
     }
 
   err = WEXITSTATUS (status);
   if (err)
     {
-      fprintf (stderr, "migrate/migrate.c: apply_executable_migration(): migration executable returned non zero status (%d): %s\n", err, migration_file);
+      fprintf (stderr, "migrate.c: apply_executable_migration(): migration executable returned non zero status (%d): %s\n", err, migration_file);
       goto teardown;
     }
 
@@ -205,7 +205,7 @@ append_name_in_migrations_table (const char migration_file[MAX_NAME_LEN])
       else
         {
           err = 1;
-          fprintf (stderr, "migrate/migrate.c: append_name_in_migrations_table(): error while performing query: %s\n", sqlite3_errmsg (db));
+          fprintf (stderr, "migrate.c: append_name_in_migrations_table(): error while performing query: %s\n", sqlite3_errmsg (db));
           goto teardown;
         }
     }
@@ -231,7 +231,7 @@ migrate (options_t *options)
   if (written > MAX_PATH_LEN)
     {
       err = 1;
-      fprintf (stderr, "migrate/migrate.c: migrate(): truncated backup database file path:%s\n", backup_file);
+      fprintf (stderr, "migrate.c: migrate(): truncated backup database file path:%s\n", backup_file);
       goto teardown;
     }
 
@@ -239,35 +239,35 @@ migrate (options_t *options)
   if (written > MAX_PATH_LEN)
     {
       err = 1;
-      fprintf (stderr, "migrate/migrate.c: migrate(): truncated fail database file path:%s\n", fail_file);
+      fprintf (stderr, "migrate.c: migrate(): truncated fail database file path:%s\n", fail_file);
       goto teardown;
     }
 
   err = open_db (options->database, options->init);
   if (err)
     {
-      fprintf (stderr, "migrate/migrate.c: migrate(): can't open database.\n");
+      fprintf (stderr, "migrate.c: migrate(): can't open database.\n");
       goto teardown;
     }
 
   err = find_last_migration_applied ();
   if (err)
     {
-      fprintf (stderr, "migrate/migrate.c: migrate(): can't find last migration applied.\n");
+      fprintf (stderr, "migrate.c: migrate(): can't find last migration applied.\n");
       goto teardown;
     }
 
   err = find_migration_files (options->migrations, &migration_files, &migration_files_len);
   if (err)
     {
-      fprintf (stderr, "migrate/migrate.c: migrate(): can't find migration files.\n");
+      fprintf (stderr, "migrate.c: migrate(): can't find migration files.\n");
       goto teardown;
     }
 
   err = backup_db (options->database, backup_file);
   if (err)
     {
-      fprintf (stderr, "migrate/migrate.c: migrate(): can't backup database.\n");
+      fprintf (stderr, "migrate.c: migrate(): can't backup database.\n");
       goto teardown;
     }
 
@@ -279,7 +279,7 @@ migrate (options_t *options)
       if (written > MAX_PATH_LEN)
         {
           should_restore_db = true;
-          fprintf (stderr, "migrate/migrate.c: migrate(): truncated migration path: %s\n", migration_path);
+          fprintf (stderr, "migrate.c: migrate(): truncated migration path: %s\n", migration_path);
           goto teardown;
         }
 
@@ -291,7 +291,7 @@ migrate (options_t *options)
           if (err)
             {
               should_restore_db = true;
-              fprintf (stderr, "migrate/migrate.c: migrate(): can't apply migration: %s\n", migration_path);
+              fprintf (stderr, "migrate.c: migrate(): can't apply migration: %s\n", migration_path);
               goto teardown;
             }
         }
@@ -301,7 +301,7 @@ migrate (options_t *options)
             {
               err = 1;
               should_restore_db = true;
-              fprintf (stderr, "migrate/migrate.c: migrate(): migration is not an executable and does not have .sql extension: %s\n", migration_path);
+              fprintf (stderr, "migrate.c: migrate(): migration is not an executable and does not have .sql extension: %s\n", migration_path);
               goto teardown;
             }
 
@@ -309,7 +309,7 @@ migrate (options_t *options)
           if (err)
             {
               should_restore_db = true;
-              fprintf (stderr, "migrate/migrate.c: migrate(): can't apply migration: %s\n", migration_path);
+              fprintf (stderr, "migrate.c: migrate(): can't apply migration: %s\n", migration_path);
               goto teardown;
             }
         }
@@ -318,7 +318,7 @@ migrate (options_t *options)
       err = reopen_db (options->database, options->init);
       if (err)
         {
-          fprintf (stderr, "migrate/migrate.c: migrate(): can't reopen database.\n");
+          fprintf (stderr, "migrate.c: migrate(): can't reopen database.\n");
           goto teardown;
         }
 
@@ -326,7 +326,7 @@ migrate (options_t *options)
       if (err)
         {
           should_restore_db = true;
-          fprintf (stderr, "migrate/migrate.c: migrate(): can't remember migration was executed: %s\n", migration_file);
+          fprintf (stderr, "migrate.c: migrate(): can't remember migration was executed: %s\n", migration_file);
           goto teardown;
         }
     }
@@ -343,11 +343,11 @@ migrate (options_t *options)
     {
       int err = backup_db (options->database, fail_file);
       if (err)
-        fprintf (stderr, "migrate/migrate.c: migrate(): can't save current state to fail database dump.\n");
+        fprintf (stderr, "migrate.c: migrate(): can't save current state to fail database dump.\n");
 
       err = backup_db (backup_file, options->database);
       if (err)
-        fprintf (stderr, "migrate/migrate.c: migrate(): can't restore database. Sorry, we tried. 😢\n");
+        fprintf (stderr, "migrate.c: migrate(): can't restore database. Sorry, we tried. 😢\n");
     }
 
   return err;

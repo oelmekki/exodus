@@ -5,8 +5,8 @@
 
 #include "main.h"
 #include "database.h"
-#include "generate/generate_migration.h"
-#include "migrate/migrate.h"
+#include "generate_migration.h"
+#include "migrate.h"
 
 static void
 usage (const char progname[static 1])

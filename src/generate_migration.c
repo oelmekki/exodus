@@ -4,8 +4,8 @@
 #include <sys/stat.h>
 #include <time.h>
 
-#include "../main.h"
-#include "../database.h"
+#include "main.h"
+#include "database.h"
 
 #define ROTATE_TEMPLATE "\n\
 ALTER TABLE %s RENAME TO %s_old;\n\
@@ -40,7 +40,7 @@ add_to_string (char *content[static 1], const char adding[static 1], size_t tota
   if (!*content)
     {
       err = 1;
-      fprintf (stderr, "generate/generate_migration.c: add_to_string(): can't allocate memory.\n");
+      fprintf (stderr, "generate_migration.c: add_to_string(): can't allocate memory.\n");
       goto teardown;
     }
 
@@ -97,7 +97,7 @@ generate_filename (char filename[MAX_PATH_LEN], options_t *options)
   if (written > MAX_PATH_LEN - 1)
     {
       err = 1;
-      fprintf (stderr, "generate/generate_migration.c: generate_filename(): filename too long, truncated: %s\n", filename);
+      fprintf (stderr, "generate_migration.c: generate_filename(): filename too long, truncated: %s\n", filename);
       goto teardown;
     }
 
@@ -125,7 +125,7 @@ find_table_sql (char *sql[static 1], const char table_name[MAX_NAME_LEN])
           if (strnlen (code, MAX_OBJECT_LEN) > MAX_OBJECT_LEN - 1)
             {
               err = 1;
-              fprintf (stderr, "generate/generate_migration.c: find_table_sql(): table code exceeds allowed size of %d bytes.\n", MAX_OBJECT_LEN);
+              fprintf (stderr, "generate_migration.c: find_table_sql(): table code exceeds allowed size of %d bytes.\n", MAX_OBJECT_LEN);
               goto teardown;
             }
 
@@ -133,7 +133,7 @@ find_table_sql (char *sql[static 1], const char table_name[MAX_NAME_LEN])
           if (!*sql)
             {
               err = 1;
-              fprintf (stderr, "generate/generate_migration.c: find_table_sql(): out of memory.\n");
+              fprintf (stderr, "generate_migration.c: find_table_sql(): out of memory.\n");
               goto teardown;
             }
           snprintf (*sql, MAX_OBJECT_LEN, "%s", code);
@@ -143,7 +143,7 @@ find_table_sql (char *sql[static 1], const char table_name[MAX_NAME_LEN])
       else
         {
           err = 1;
-          fprintf (stderr, "generate/generate_migration.c: find_table_sql(): error while performing query : %s\n", sqlite3_errmsg (db));
+          fprintf (stderr, "generate_migration.c: find_table_sql(): error while performing query : %s\n", sqlite3_errmsg (db));
           goto teardown;
         }
     }
@@ -151,7 +151,7 @@ find_table_sql (char *sql[static 1], const char table_name[MAX_NAME_LEN])
   if (!*sql)
     {
       err = 1;
-      fprintf (stderr, "generate/generate_migration.c: find_table_sql(): no such table: %s\n", table_name);
+      fprintf (stderr, "generate_migration.c: find_table_sql(): no such table: %s\n", table_name);
       goto teardown;
     }
 
@@ -190,7 +190,7 @@ find_triggers (database_object_t **triggers, const char table_name[MAX_NAME_LEN]
           if (!*triggers)
             {
               err = 1;
-              fprintf (stderr, "generate/generate_migration.c: find_triggers(): out of memory.\n");
+              fprintf (stderr, "generate_migration.c: find_triggers(): out of memory.\n");
               goto teardown;
             }
 
@@ -200,14 +200,14 @@ find_triggers (database_object_t **triggers, const char table_name[MAX_NAME_LEN]
            if (strnlen (name, MAX_NAME_LEN) > MAX_NAME_LEN - 1)
             {
               err = 1;
-              fprintf (stderr, "generate/generate_migration.c: find_triggers(): trigger name exceeds maximum length authorized (%d bytes)\n", MAX_NAME_LEN);
+              fprintf (stderr, "generate_migration.c: find_triggers(): trigger name exceeds maximum length authorized (%d bytes)\n", MAX_NAME_LEN);
               goto teardown;
             }
 
            if (strnlen (sql, MAX_OBJECT_LEN) > MAX_OBJECT_LEN - 1)
             {
               err = 1;
-              fprintf (stderr, "generate/generate_migration.c: find_triggers(): trigger definition exceeds maximum length authorized (%d bytes)\n", MAX_OBJECT_LEN);
+              fprintf (stderr, "generate_migration.c: find_triggers(): trigger definition exceeds maximum length authorized (%d bytes)\n", MAX_OBJECT_LEN);
               goto teardown;
             }
 
@@ -219,7 +219,7 @@ find_triggers (database_object_t **triggers, const char table_name[MAX_NAME_LEN]
       else
         {
           err = 1;
-          fprintf (stderr, "generate/generate_migration.c: find_triggers(): error while performing query: %s\n", sqlite3_errmsg (db));
+          fprintf (stderr, "generate_migration.c: find_triggers(): error while performing query: %s\n", sqlite3_errmsg (db));
           goto teardown;
         }
     }
@@ -259,7 +259,7 @@ find_views (database_object_t **views, const char table_name[MAX_NAME_LEN], size
           if (!*views)
             {
               err = 1;
-              fprintf (stderr, "generate/generate_migration.c: find_views(): out of memory.\n");
+              fprintf (stderr, "generate_migration.c: find_views(): out of memory.\n");
               goto teardown;
             }
 
@@ -269,14 +269,14 @@ find_views (database_object_t **views, const char table_name[MAX_NAME_LEN], size
            if (strnlen (name, MAX_NAME_LEN) > MAX_NAME_LEN - 1)
             {
               err = 1;
-              fprintf (stderr, "generate/generate_migration.c: find_views(): view name exceeds maximum length authorized (%d bytes)\n", MAX_NAME_LEN);
+              fprintf (stderr, "generate_migration.c: find_views(): view name exceeds maximum length authorized (%d bytes)\n", MAX_NAME_LEN);
               goto teardown;
             }
 
            if (strnlen (sql, MAX_OBJECT_LEN) > MAX_OBJECT_LEN - 1)
             {
               err = 1;
-              fprintf (stderr, "generate/generate_migration.c: find_views(): view definition exceeds maximum length authorized (%d bytes)\n", MAX_OBJECT_LEN);
+              fprintf (stderr, "generate_migration.c: find_views(): view definition exceeds maximum length authorized (%d bytes)\n", MAX_OBJECT_LEN);
               goto teardown;
             }
 
@@ -288,7 +288,7 @@ find_views (database_object_t **views, const char table_name[MAX_NAME_LEN], size
       else
         {
           err = 1;
-          fprintf (stderr, "generate/generate_migration.c: find_views(): error while performing query: %s\n", sqlite3_errmsg (db));
+          fprintf (stderr, "generate_migration.c: find_views(): error while performing query: %s\n", sqlite3_errmsg (db));
           goto teardown;
         }
     }
@@ -328,7 +328,7 @@ find_indexes (database_object_t **indexes, const char table_name[MAX_NAME_LEN], 
           if (!*indexes)
             {
               err = 1;
-              fprintf (stderr, "generate/generate_migration.c: find_indexes(): out of memory.\n");
+              fprintf (stderr, "generate_migration.c: find_indexes(): out of memory.\n");
               goto teardown;
             }
 
@@ -338,14 +338,14 @@ find_indexes (database_object_t **indexes, const char table_name[MAX_NAME_LEN], 
            if (strnlen (name, MAX_NAME_LEN) > MAX_NAME_LEN - 1)
             {
               err = 1;
-              fprintf (stderr, "generate/generate_migration.c: find_indexes(): index name exceeds maximum length authorized (%d bytes)\n", MAX_NAME_LEN);
+              fprintf (stderr, "generate_migration.c: find_indexes(): index name exceeds maximum length authorized (%d bytes)\n", MAX_NAME_LEN);
               goto teardown;
             }
 
            if (strnlen (sql, MAX_OBJECT_LEN) > MAX_OBJECT_LEN - 1)
             {
               err = 1;
-              fprintf (stderr, "generate/generate_migration.c: find_indexes(): index definition exceeds maximum length authorized (%d bytes)\n", MAX_OBJECT_LEN);
+              fprintf (stderr, "generate_migration.c: find_indexes(): index definition exceeds maximum length authorized (%d bytes)\n", MAX_OBJECT_LEN);
               goto teardown;
             }
 
@@ -357,7 +357,7 @@ find_indexes (database_object_t **indexes, const char table_name[MAX_NAME_LEN], 
       else
         {
           err = 1;
-          fprintf (stderr, "generate/generate_migration.c: find_indexes(): error while performing query: %s\n", sqlite3_errmsg (db));
+          fprintf (stderr, "generate_migration.c: find_indexes(): error while performing query: %s\n", sqlite3_errmsg (db));
           goto teardown;
         }
     }
@@ -380,13 +380,13 @@ write_drop_objects (char **content, database_object_t *triggers, size_t triggers
       if (written > MAX_OBJECT_LEN)
         {
           err = 1;
-          fprintf (stderr, "generate/generate_migration.c: write_drop_objects(): truncated trigger's drop statement.\n");
+          fprintf (stderr, "generate_migration.c: write_drop_objects(): truncated trigger's drop statement.\n");
           goto teardown;
         }
       err = add_to_string (content, drop_statement, MAX_FILE_LEN);
       if (err)
         {
-          fprintf (stderr, "generate/generate_migration.c: write_drop_objects(): can't add trigger's drop statement.\n");
+          fprintf (stderr, "generate_migration.c: write_drop_objects(): can't add trigger's drop statement.\n");
           goto teardown;
         }
     }
@@ -398,13 +398,13 @@ write_drop_objects (char **content, database_object_t *triggers, size_t triggers
       if (written > MAX_OBJECT_LEN)
         {
           err = 1;
-          fprintf (stderr, "generate/generate_migration.c: write_drop_objects(): truncated view's drop statement.\n");
+          fprintf (stderr, "generate_migration.c: write_drop_objects(): truncated view's drop statement.\n");
           goto teardown;
         }
       err = add_to_string (content, drop_statement, MAX_FILE_LEN);
       if (err)
         {
-          fprintf (stderr, "generate/generate_migration.c: write_drop_objects(): can't add view's drop statement.\n");
+          fprintf (stderr, "generate_migration.c: write_drop_objects(): can't add view's drop statement.\n");
           goto teardown;
         }
     }
@@ -416,13 +416,13 @@ write_drop_objects (char **content, database_object_t *triggers, size_t triggers
       if (written > MAX_OBJECT_LEN)
         {
           err = 1;
-          fprintf (stderr, "generate/generate_migration.c: write_drop_objects(): truncated index' drop statement.\n");
+          fprintf (stderr, "generate_migration.c: write_drop_objects(): truncated index' drop statement.\n");
           goto teardown;
         }
       err = add_to_string (content, drop_statement, MAX_FILE_LEN);
       if (err)
         {
-          fprintf (stderr, "generate/generate_migration.c: write_drop_objects(): can't add index' drop statement.\n");
+          fprintf (stderr, "generate_migration.c: write_drop_objects(): can't add index' drop statement.\n");
           goto teardown;
         }
     }
@@ -441,14 +441,14 @@ write_table_rotation (char **content, const char table_sql[static 1], const char
   if (written > MAX_OBJECT_LEN)
     {
       err = 1;
-      fprintf (stderr, "generate/generate_migration.c: write_table_rotation(): rotation SQL too long.\n");
+      fprintf (stderr, "generate_migration.c: write_table_rotation(): rotation SQL too long.\n");
       goto teardown;
     }
 
   err = add_to_string (content, rotation_statement, MAX_FILE_LEN);
   if (err)
     {
-      fprintf (stderr, "generate/generate_migration.c: write_table_rotation(): can't add rotation to SQL.\n");
+      fprintf (stderr, "generate_migration.c: write_table_rotation(): can't add rotation to SQL.\n");
       goto teardown;
     }
 
@@ -468,13 +468,13 @@ write_recreate_objects (char **content, database_object_t *triggers, size_t trig
       if (written > MAX_OBJECT_LEN)
         {
           err = 1;
-          fprintf (stderr, "generate/generate_migration.c: write_recreate_objects(): truncated trigger's drop statement.\n");
+          fprintf (stderr, "generate_migration.c: write_recreate_objects(): truncated trigger's drop statement.\n");
           goto teardown;
         }
       err = add_to_string (content, create_statement, MAX_FILE_LEN);
       if (err)
         {
-          fprintf (stderr, "generate/generate_migration.c: write_recreate_objects(): can't add trigger's create statement.\n");
+          fprintf (stderr, "generate_migration.c: write_recreate_objects(): can't add trigger's create statement.\n");
           goto teardown;
         }
     }
@@ -486,13 +486,13 @@ write_recreate_objects (char **content, database_object_t *triggers, size_t trig
       if (written > MAX_OBJECT_LEN)
         {
           err = 1;
-          fprintf (stderr, "generate/generate_migration.c: write_recreate_objects(): truncated view's drop statement.\n");
+          fprintf (stderr, "generate_migration.c: write_recreate_objects(): truncated view's drop statement.\n");
           goto teardown;
         }
       err = add_to_string (content, create_statement, MAX_FILE_LEN);
       if (err)
         {
-          fprintf (stderr, "generate/generate_migration.c: write_recreate_objects(): can't add view's create statement.\n");
+          fprintf (stderr, "generate_migration.c: write_recreate_objects(): can't add view's create statement.\n");
           goto teardown;
         }
     }
@@ -504,13 +504,13 @@ write_recreate_objects (char **content, database_object_t *triggers, size_t trig
       if (written > MAX_OBJECT_LEN)
         {
           err = 1;
-          fprintf (stderr, "generate/generate_migration.c: write_recreate_objects(): truncated index' drop statement.\n");
+          fprintf (stderr, "generate_migration.c: write_recreate_objects(): truncated index' drop statement.\n");
           goto teardown;
         }
       err = add_to_string (content, create_statement, MAX_FILE_LEN);
       if (err)
         {
-          fprintf (stderr, "generate/generate_migration.c: write_recreate_objects(): can't add index' create statement.\n");
+          fprintf (stderr, "generate_migration.c: write_recreate_objects(): can't add index' create statement.\n");
           goto teardown;
         }
     }
@@ -534,14 +534,14 @@ recreate_table_migration (char **content, const char table_name[MAX_NAME_LEN])
   err = add_to_string (content, pragmas, MAX_FILE_LEN);
   if (err)
     {
-      fprintf (stderr, "generate/generate_migration.c: recreate_table_migration(): can't add pragmas.\n");
+      fprintf (stderr, "generate_migration.c: recreate_table_migration(): can't add pragmas.\n");
       goto teardown;
     }
 
   err = find_table_sql (&table_sql, table_name);
   if (err)
     {
-      fprintf (stderr, "generate/generate_migration.c: recreate_table_migration(): can't retrieve table's SQL code.\n");
+      fprintf (stderr, "generate_migration.c: recreate_table_migration(): can't retrieve table's SQL code.\n");
       goto teardown;
     }
 
@@ -549,7 +549,7 @@ recreate_table_migration (char **content, const char table_name[MAX_NAME_LEN])
   err = find_triggers (&triggers, table_name, &triggers_len);
   if (err)
     {
-      fprintf (stderr, "generate/generate_migration.c: recreate_table_migration(): can't retrieve triggers.\n");
+      fprintf (stderr, "generate_migration.c: recreate_table_migration(): can't retrieve triggers.\n");
       goto teardown;
     }
 
@@ -557,7 +557,7 @@ recreate_table_migration (char **content, const char table_name[MAX_NAME_LEN])
   err = find_views (&views, table_name, &views_len);
   if (err)
     {
-      fprintf (stderr, "generate/generate_migration.c: recreate_table_migration(): can't retrieve views.\n");
+      fprintf (stderr, "generate_migration.c: recreate_table_migration(): can't retrieve views.\n");
       goto teardown;
     }
 
@@ -565,28 +565,28 @@ recreate_table_migration (char **content, const char table_name[MAX_NAME_LEN])
   err = find_indexes (&indexes, table_name, &indexes_len);
   if (err)
     {
-      fprintf (stderr, "generate/generate_migration.c: recreate_table_migration(): can't retrieve indexes.\n");
+      fprintf (stderr, "generate_migration.c: recreate_table_migration(): can't retrieve indexes.\n");
       goto teardown;
     }
 
   err = write_drop_objects (content, triggers, triggers_len, views, views_len, indexes, indexes_len);
   if (err)
     {
-      fprintf (stderr, "generate/generate_migration.c: recreate_table_migration(): can't write drop statements.\n");
+      fprintf (stderr, "generate_migration.c: recreate_table_migration(): can't write drop statements.\n");
       goto teardown;
     }
 
   err = write_table_rotation (content, table_sql, table_name);
   if (err)
     {
-      fprintf (stderr, "generate/generate_migration.c: recreate_table_migration(): can't write table rotation statements.\n");
+      fprintf (stderr, "generate_migration.c: recreate_table_migration(): can't write table rotation statements.\n");
       goto teardown;
     }
 
   err = write_recreate_objects (content, triggers, triggers_len, views, views_len, indexes, indexes_len);
   if (err)
     {
-      fprintf (stderr, "generate/generate_migration.c: recreate_table_migration(): can't write dropped objects recreation statements.\n");
+      fprintf (stderr, "generate_migration.c: recreate_table_migration(): can't write dropped objects recreation statements.\n");
       goto teardown;
     }
 
@@ -609,7 +609,7 @@ raw_migration (char **content)
   if (!*content)
     {
       err = 1;
-      fprintf (stderr, "generate/generate_migration.c: raw_migration(): can't allocate memory.\n");
+      fprintf (stderr, "generate_migration.c: raw_migration(): can't allocate memory.\n");
       goto teardown;
     }
 
@@ -629,7 +629,7 @@ save_migration (char *content, const char filename[MAX_PATH_LEN])
   if (!file)
     {
       err = 1;
-      fprintf (stderr, "generate/generate_migration.c: save_migration(): can't open file for writing: %s\n", filename);
+      fprintf (stderr, "generate_migration.c: save_migration(): can't open file for writing: %s\n", filename);
       goto teardown;
     }
 
@@ -651,14 +651,14 @@ generate_migration (options_t *options)
   err = ensure_migration_directory_exists (options);
   if (err)
     {
-      fprintf (stderr, "generate/generate_migration.c: generate_migration(): can't ensure directory exists.\n");
+      fprintf (stderr, "generate_migration.c: generate_migration(): can't ensure directory exists.\n");
       goto teardown;
     }
 
   err = generate_filename (filename, options);
   if (err)
     {
-      fprintf (stderr, "generate/generate_migration.c: generate_migration(): can't generate filename.\n");
+      fprintf (stderr, "generate_migration.c: generate_migration(): can't generate filename.\n");
       goto teardown;
     }
 
@@ -667,14 +667,14 @@ generate_migration (options_t *options)
       err = open_db (options->database, options->init);
       if (err)
         {
-          fprintf (stderr, "generate/generate_migration.c: generate_migration(): can't open database.\n");
+          fprintf (stderr, "generate_migration.c: generate_migration(): can't open database.\n");
           goto teardown;
         }
 
       err = recreate_table_migration (&content, options->recreate);
       if (err)
         {
-          fprintf (stderr, "generate/generate_migration.c: generate_migration(): can't generate table recreation migration.\n");
+          fprintf (stderr, "generate_migration.c: generate_migration(): can't generate table recreation migration.\n");
           goto teardown;
         }
     }
@@ -683,7 +683,7 @@ generate_migration (options_t *options)
       err = raw_migration (&content);
       if (err)
         {
-          fprintf (stderr, "generate/generate_migration.c: generate_migration(): can't generate raw migration.\n");
+          fprintf (stderr, "generate_migration.c: generate_migration(): can't generate raw migration.\n");
           goto teardown;
         }
     }
@@ -691,7 +691,7 @@ generate_migration (options_t *options)
   err = save_migration (content, filename);
   if (err)
     {
-      fprintf (stderr, "generate/generate_migration.c: generate_migration(): could not write migration to filesystem.\n");
+      fprintf (stderr, "generate_migration.c: generate_migration(): could not write migration to filesystem.\n");
       goto teardown;
     }
 

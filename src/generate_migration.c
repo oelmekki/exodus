@@ -44,9 +44,8 @@ add_to_string (char *content[static 1], const char adding[static 1], size_t tota
       goto teardown;
     }
 
-  size_t left = total_max - content_len;
-  int written = snprintf (*content + content_len, left, "%s", adding);
-  if ((size_t) written >= left)
+  int written = snprintf (*content + content_len, adding_len + 1, "%s", adding);
+  if ((size_t) written >= adding_len + 1)
     {
       err = 1;
       fprintf (stderr, "generate_migration.c: add_to_string(): max migration file length exceeded on adding.\n");
@@ -143,7 +142,7 @@ find_table_sql (char *sql[static 1], const char table_name[MAX_NAME_LEN])
               fprintf (stderr, "generate_migration.c: find_table_sql(): out of memory.\n");
               goto teardown;
             }
-          snprintf (*sql, MAX_OBJECT_LEN, "%s", code);
+          snprintf (*sql, strlen (code) + 1, "%s", code);
         }
       else if (s == SQLITE_DONE)
         break;

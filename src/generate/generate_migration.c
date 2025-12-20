@@ -105,37 +105,6 @@ generate_filename (char filename[MAX_PATH_LEN], options_t *options)
   return err;
 }
 
-// TODO: this should not be hardcoded. It should be in an optional
-// configuration file, like `$XDG_CONFIG_HOME/exodus/default_migration_template`,
-// and have a CLI option to point the config directory to an other path.
-static int
-write_default_content (char **content)
-{
-  int err = 0;
-
-  const char *default_content = "\
-PRAGMA foreign_keys = ON;\n\
-PRAGMA journal_mode = WAL;\n\
-PRAGMA synchronous = NORMAL;\n\
-PRAGMA mmap_size = 2147483648;\n\
-PRAGMA page_size = 8192;\n\
-PRAGMA journal_size_limit = 27103364;\n\
-PRAGMA cache_size = 2000;\n\
-PRAGMA auto_vacuum = INCREMENTAL;\n\
-PRAGMA temp_store = MEMORY;\n\
-";
-
-  err = add_to_string (content, default_content, MAX_FILE_LEN);
-  if (err)
-    {
-      fprintf (stderr, "generate/generate_migration.c: write_default_content(): can't add to content string.\n");
-      goto teardown;
-    }
-
-  teardown:
-  return err;
-}
-
 static int
 find_table_sql (char *sql[static 1], const char table_name[MAX_NAME_LEN])
 {
@@ -690,13 +659,6 @@ generate_migration (options_t *options)
   if (err)
     {
       fprintf (stderr, "generate/generate_migration.c: generate_migration(): can't generate filename.\n");
-      goto teardown;
-    }
-
-  err = write_default_content (&content);
-  if (err)
-    {
-      fprintf (stderr, "generate/generate_migration.c: generate_migration(): can't write default pragmas.\n");
       goto teardown;
     }
 

@@ -1,3 +1,4 @@
+#include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -67,7 +68,7 @@ ensure_migration_directory_exists (options_t *options)
       err = mkdir (options->migrations, 0755);
       if (err)
         {
-          fprintf (stderr, "generate/generation_migration.c: ensure_migration_directory_exists(): can't create directory: %s\n", options->migrations);
+          fprintf (stderr, "generate_migration.c: ensure_migration_directory_exists(): can't create directory: %s\n", options->migrations);
           goto teardown;
         }
     }
@@ -76,7 +77,7 @@ ensure_migration_directory_exists (options_t *options)
       if (!S_ISDIR (st.st_mode))
         {
           err = 1;
-          fprintf (stderr, "generate/generation_migration.c: ensure_migration_directory_exists(): migrations path is not a directory: %s\nPlease provide an other migrations directory path with --migrations.\n", options->migrations);
+          fprintf (stderr, "generate_migration.c: ensure_migration_directory_exists(): migrations path is not a directory: %s\nPlease provide an other migrations directory path with --migrations.\n", options->migrations);
           goto teardown;
         }
     }
@@ -92,7 +93,7 @@ generate_filename (char filename[MAX_PATH_LEN], options_t *options)
 
   time_t timestamp = time (NULL);
 
-  int written = snprintf (filename, MAX_PATH_LEN - 1, "%s/%ld-%s.sql", options->migrations, timestamp, options->migration_name);
+  int written = snprintf (filename, MAX_PATH_LEN - 1, "%s/%" PRIdMAX "-%s.sql", options->migrations, (intmax_t) timestamp, options->migration_name);
   if (written >= MAX_PATH_LEN - 1)
     {
       err = 1;
@@ -109,7 +110,7 @@ find_table_sql (char *sql[static 1], const char table_name[MAX_NAME_LEN])
 {
   int err = 0;
   sqlite3_stmt *stmt = NULL;
-  char query[BUFSIZ] = "SELECT sql FROM sqlite_master WHERE type='table' AND name = ?";
+  char query[BUFSIZ] = "SELECT sql FROM sqlite_schema WHERE type='table' AND name = ?";
 
   int rc = sqlite3_prepare_v2 (db, query, -1, &stmt, NULL);
   if (rc != SQLITE_OK)
@@ -172,7 +173,7 @@ find_triggers (database_object_t **triggers, const char table_name[MAX_NAME_LEN]
 {
   int err = 0;
   sqlite3_stmt *stmt = NULL;
-  char query[BUFSIZ] = "SELECT name, sql FROM sqlite_master WHERE type = 'trigger' AND (sql LIKE ? OR sql LIKE ? OR sql LIKE ?)";
+  char query[BUFSIZ] = "SELECT name, sql FROM sqlite_schema WHERE type = 'trigger' AND (sql LIKE ? OR sql LIKE ? OR sql LIKE ?)";
   char pattern_1[MAX_NAME_LEN + 4] = {0};
   char pattern_2[MAX_NAME_LEN + 4] = {0};
   char pattern_3[MAX_NAME_LEN + 4] = {0};
@@ -248,7 +249,7 @@ find_views (database_object_t **views, const char table_name[MAX_NAME_LEN], size
 {
   int err = 0;
   sqlite3_stmt *stmt = NULL;
-  char query[BUFSIZ] = "SELECT name, sql FROM sqlite_master WHERE type = 'view' AND (sql LIKE ? OR sql LIKE ? OR sql LIKE ?)";
+  char query[BUFSIZ] = "SELECT name, sql FROM sqlite_schema WHERE type = 'view' AND (sql LIKE ? OR sql LIKE ? OR sql LIKE ?)";
   char pattern_1[MAX_NAME_LEN + 4] = {0};
   char pattern_2[MAX_NAME_LEN + 4] = {0};
   char pattern_3[MAX_NAME_LEN + 4] = {0};
@@ -324,7 +325,7 @@ find_indexes (database_object_t **indexes, const char table_name[MAX_NAME_LEN], 
 {
   int err = 0;
   sqlite3_stmt *stmt = NULL;
-  char query[BUFSIZ] = "SELECT name, sql FROM sqlite_master WHERE type = 'index' AND (sql LIKE ? OR sql LIKE ? OR sql LIKE ?)";
+  char query[BUFSIZ] = "SELECT name, sql FROM sqlite_schema WHERE type = 'index' AND (sql LIKE ? OR sql LIKE ? OR sql LIKE ?)";
   char pattern_1[MAX_NAME_LEN + 4] = {0};
   char pattern_2[MAX_NAME_LEN + 4] = {0};
   char pattern_3[MAX_NAME_LEN + 4] = {0};
@@ -495,7 +496,7 @@ write_recreate_objects (char **content, database_object_t *triggers, size_t trig
       if (written >= MAX_OBJECT_LEN)
         {
           err = 1;
-          fprintf (stderr, "generate_migration.c: write_recreate_objects(): truncated trigger's drop statement.\n");
+          fprintf (stderr, "generate_migration.c: write_recreate_objects(): truncated trigger's create statement.\n");
           goto teardown;
         }
       err = add_to_string (content, create_statement, MAX_FILE_LEN);
@@ -513,7 +514,7 @@ write_recreate_objects (char **content, database_object_t *triggers, size_t trig
       if (written >= MAX_OBJECT_LEN)
         {
           err = 1;
-          fprintf (stderr, "generate_migration.c: write_recreate_objects(): truncated view's drop statement.\n");
+          fprintf (stderr, "generate_migration.c: write_recreate_objects(): truncated view's create statement.\n");
           goto teardown;
         }
       err = add_to_string (content, create_statement, MAX_FILE_LEN);
@@ -531,7 +532,7 @@ write_recreate_objects (char **content, database_object_t *triggers, size_t trig
       if (written >= MAX_OBJECT_LEN)
         {
           err = 1;
-          fprintf (stderr, "generate_migration.c: write_recreate_objects(): truncated index' drop statement.\n");
+          fprintf (stderr, "generate_migration.c: write_recreate_objects(): truncated index' create statement.\n");
           goto teardown;
         }
       err = add_to_string (content, create_statement, MAX_FILE_LEN);

@@ -23,7 +23,15 @@ exec_init (const char init_path[MAX_PATH_LEN])
     }
 
   fseek (file, 0, SEEK_END);
+
   long size = ftell (file);
+  if (size < 0)
+    {
+      err = 1;
+      fprintf (stderr, "database.c: exec_init(): error while reading init file.\n");
+      goto teardown;
+    }
+
   fseek (file, 0, SEEK_SET);
 
   sql = calloc (1, size + 1);
@@ -169,10 +177,11 @@ backup_db (const char src[MAX_PATH_LEN], const char dest[MAX_PATH_LEN])
         {
           err = 1;
           fprintf (stderr, "database.c: backup_db(): error while performing query: %s\n", sqlite3_errmsg (dest_db));
-          goto teardown;
+          goto finish_backup;
         }
     }
 
+  finish_backup:
   err = sqlite3_backup_finish (run);
   if (err)
     {

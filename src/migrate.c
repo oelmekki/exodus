@@ -118,7 +118,15 @@ apply_sql_migration (const char migration_file[MAX_PATH_LEN])
     }
 
   fseek (file, 0, SEEK_END);
+
   long size = ftell (file);
+  if (size < 0)
+    {
+      err = 1;
+      fprintf (stderr, "migrate.c: apply_sql_migration(): error while reading migration file.\n");
+      goto teardown;
+    }
+
   fseek (file, 0, SEEK_SET);
 
   sql = calloc (1, size + 1);
@@ -229,6 +237,66 @@ append_name_in_migrations_table (const char migration_file[MAX_NAME_LEN])
   return err;
 }
 
+static int
+dump_structure (const char *structure_path, const char *migration_file)
+{
+  int err = 0;
+  sqlite3_stmt *stmt = NULL;
+  char query[BUFSIZ] = "SELECT sql FROM sqlite_schema WHERE sql IS NOT NULL ORDER BY rowid";
+  FILE *file = NULL;
+
+  file = fopen (structure_path, "w");
+  if (!file)
+    {
+      err = 1;
+      fprintf (stderr, "migrate.c: dump_structure(): can't open structure file: %s\n", structure_path);
+      goto teardown;
+    }
+
+  int rc = sqlite3_prepare_v2 (db, query, -1, &stmt, NULL);
+  if (rc != SQLITE_OK)
+    {
+      err = 1;
+      fprintf (stderr, "migrate.c: dump_structure(): error while preparing query: %s\n", sqlite3_errmsg (db));
+      goto teardown;
+    }
+
+  while (1)
+    {
+      int s = sqlite3_step (stmt);
+      if (s == SQLITE_ROW)
+        {
+          const char *sql = (const char *) sqlite3_column_text (stmt, 0);
+          fprintf (file, "%s;\n\n", sql);
+        }
+      else if (s == SQLITE_DONE)
+        break;
+      else
+        {
+          err = 1;
+          fprintf (stderr, "migrate.c: dump_structure(): error while performing query: %s\n", sqlite3_errmsg (db));
+          goto teardown;
+        }
+    }
+
+  char *escaped = sqlite3_mprintf("%Q", migration_file);
+  if (!escaped)
+    {
+      err = 1;
+      fprintf (stderr, "migrate.c: dump_structure(): out of memory while escaping migration name.\n");
+      goto teardown;
+    }
+
+  fprintf (file, "INSERT INTO migrations(name) VALUES (%s);\n", escaped);
+  sqlite3_free (escaped);
+
+  teardown:
+  if (stmt) sqlite3_finalize (stmt);
+  if (file) fclose (file);
+
+  return err;
+}
+
 int
 migrate (options_t *options)
 {
@@ -239,6 +307,7 @@ migrate (options_t *options)
   size_t migration_files_len = 0;
   char backup_file[MAX_PATH_LEN] = {0};
   char fail_file[MAX_PATH_LEN] = {0};
+  char last_migration_file[MAX_PATH_LEN] = {0};
 
   int written = snprintf (backup_file, MAX_PATH_LEN, "%s.prev", options->database);
   if (written >= MAX_PATH_LEN)
@@ -248,7 +317,7 @@ migrate (options_t *options)
       goto teardown;
     }
 
-  written = snprintf (fail_file, MAX_PATH_LEN, "%s.fail", options->database);
+  written = snprintf (fail_file, MAX_PATH_LEN, "%s.failed", options->database);
   if (written >= MAX_PATH_LEN)
     {
       err = 1;
@@ -298,6 +367,8 @@ migrate (options_t *options)
 
       printf ("Applying migration %s…\n", migration_path);
 
+      snprintf (last_migration_file, MAX_PATH_LEN, "%s", migration_file);
+
       if (strnlen (migration_file, MAX_PATH_LEN) > 4 && strncmp (migration_file + strnlen (migration_file, MAX_PATH_LEN) - 4, ".sql", MAX_PATH_LEN) == 0)
         {
           err = apply_sql_migration (migration_path);
@@ -340,6 +411,17 @@ migrate (options_t *options)
         {
           should_restore_db = true;
           fprintf (stderr, "migrate.c: migrate(): can't remember migration was executed: %s\n", migration_file);
+          goto teardown;
+        }
+    }
+
+  if (last_migration_file[0] != 0)
+    {
+      err = dump_structure (options->structure, last_migration_file);
+      if (err)
+        {
+          should_restore_db = true;
+          fprintf (stderr, "migrate.c: migrate(): can't dump structure file.\n");
           goto teardown;
         }
     }

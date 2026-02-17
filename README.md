@@ -14,6 +14,14 @@ are:
 
 Exodus' only dependency is SQLite.
 
+## Build dependencies
+
+To build exodus, you will need a few dev tools:
+
+- make
+- gcc or clang (or anything compatible)
+- pkg-config
+
 Debian/Ubuntu users will have to install SQLite headers to build Exodus:
 
 ```
@@ -33,6 +41,13 @@ can change the PREFIX variable like this:
 ```
 make
 sudo make install PREFIX=/usr
+```
+
+It uses gcc by default. To use an other compiler, such as clang:
+
+```
+make CC=clang
+sudo make install
 ```
 
 ## Usage

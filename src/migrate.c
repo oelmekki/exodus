@@ -346,6 +346,9 @@ migrate (options_t *options)
 			goto teardown;
 		}
 
+	if (migration_files_len == 0)
+		goto teardown;
+
 	err = backup_db (options->database, backup_file);
 	if (err)
 		{

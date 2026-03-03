@@ -11,7 +11,7 @@
 static void
 usage (const char progname[static 1])
 {
-  printf ("\
+	printf ("\
 %s [options] generate <migration name> [--recreate <table>]\n\
 %s [options] migrate\n\
 \n\
@@ -67,215 +67,215 @@ the first one existing in this list:\n\
 \n\
 Options can be:\n\
 \n\
-  -h, --help: display this help.\n\
-  -d, --database <database file>: use this file as database.\n\
-  -m, --migrations <migrations directory>: use this directory for migrations.\n\
-  -s, --structure <structure file>: use this file for SQL structure.\n\
-  -i, --init <SQL init file>: content of this file will be executed when opening each connection.\n\
+	-h, --help: display this help.\n\
+	-d, --database <database file>: use this file as database.\n\
+	-m, --migrations <migrations directory>: use this directory for migrations.\n\
+	-s, --structure <structure file>: use this file for SQL structure.\n\
+	-i, --init <SQL init file>: content of this file will be executed when opening each connection.\n\
 ", progname, progname);
 }
 
 static bool
 file_exists (const char *path)
 {
-  struct stat st;
-  if (stat (path, &st) == 0)
-    return true;
+	struct stat st;
+	if (stat (path, &st) == 0)
+		return true;
 
-  return false;
+	return false;
 }
 
 static void
 find_init_file (char init[MAX_PATH_LEN])
 {
-  char *xdg_config = getenv ("XDG_CONFIG_HOME");
+	char *xdg_config = getenv ("XDG_CONFIG_HOME");
 
-  if (xdg_config)
-    {
-      snprintf (init, MAX_PATH_LEN, "%s/exodus-init.sql", xdg_config);
-      if (file_exists (init))
-        return;
-    }
+	if (xdg_config)
+		{
+			snprintf (init, MAX_PATH_LEN, "%s/exodus-init.sql", xdg_config);
+			if (file_exists (init))
+				return;
+		}
 
-  char *home = getenv ("HOME");
-  if (home)
-    {
-      snprintf (init, MAX_PATH_LEN, "%s/.config/exodus-init.sql", home);
-      if (file_exists (init))
-        return;
-    }
+	char *home = getenv ("HOME");
+	if (home)
+		{
+			snprintf (init, MAX_PATH_LEN, "%s/.config/exodus-init.sql", home);
+			if (file_exists (init))
+				return;
+		}
 
-  snprintf (init, MAX_PATH_LEN, "/etc/exodus-init.sql");
-  if (file_exists (init))
-    return;
+	snprintf (init, MAX_PATH_LEN, "/etc/exodus-init.sql");
+	if (file_exists (init))
+		return;
 
-  init[0] = 0;
+	init[0] = 0;
 }
 
 static int
 parse_options (int argc, char **argv, options_t options[static 1])
 {
-  int err = 0;
+	int err = 0;
 
-  if (argc > 1)
-    {
-      for (int i = 1; i < argc; i++)
-        {
-          if (strncmp (argv[i], "--help", 10) == 0 || strncmp (argv[i], "-h", 10) == 0)
-            {
-              usage (argv[0]);
-              exit (0);
-            }
+	if (argc > 1)
+		{
+			for (int i = 1; i < argc; i++)
+				{
+					if (strncmp (argv[i], "--help", 10) == 0 || strncmp (argv[i], "-h", 10) == 0)
+						{
+							usage (argv[0]);
+							exit (0);
+						}
 
-          if (strncmp (argv[i], "--database", 20) == 0 || strncmp (argv[i], "-d", 10) == 0)
-            {
-              if (argc < i + 2)
-                {
-                  fprintf (stderr, "You need to provide a value for %s.\n\n", argv[i]);
-                  usage (argv[0]);
-                  err = 1;
-                  goto teardown;
-                }
+					if (strncmp (argv[i], "--database", 20) == 0 || strncmp (argv[i], "-d", 10) == 0)
+						{
+							if (argc < i + 2)
+								{
+									fprintf (stderr, "You need to provide a value for %s.\n\n", argv[i]);
+									usage (argv[0]);
+									err = 1;
+									goto teardown;
+								}
 
-              snprintf (options->database, MAX_PATH_LEN - 1, "%s", argv[++i]);
-              continue;
-            }
+							snprintf (options->database, MAX_PATH_LEN - 1, "%s", argv[++i]);
+							continue;
+						}
 
-          if (strncmp (argv[i], "--migrations", 20) == 0 || strncmp (argv[i], "-m", 10) == 0)
-            {
-              if (argc < i + 2)
-                {
-                  fprintf (stderr, "You need to provide a value for %s.\n\n", argv[i]);
-                  usage (argv[0]);
-                  err = 1;
-                  goto teardown;
-                }
+					if (strncmp (argv[i], "--migrations", 20) == 0 || strncmp (argv[i], "-m", 10) == 0)
+						{
+							if (argc < i + 2)
+								{
+									fprintf (stderr, "You need to provide a value for %s.\n\n", argv[i]);
+									usage (argv[0]);
+									err = 1;
+									goto teardown;
+								}
 
-              snprintf (options->migrations, MAX_PATH_LEN - 1, "%s", argv[++i]);
-              continue;
-            }
+							snprintf (options->migrations, MAX_PATH_LEN - 1, "%s", argv[++i]);
+							continue;
+						}
 
-          if (strncmp (argv[i], "--structure", 20) == 0 || strncmp (argv[i], "-s", 10) == 0)
-            {
-              if (argc < i + 2)
-                {
-                  fprintf (stderr, "You need to provide a value for %s.\n\n", argv[i]);
-                  usage (argv[0]);
-                  err = 1;
-                  goto teardown;
-                }
+					if (strncmp (argv[i], "--structure", 20) == 0 || strncmp (argv[i], "-s", 10) == 0)
+						{
+							if (argc < i + 2)
+								{
+									fprintf (stderr, "You need to provide a value for %s.\n\n", argv[i]);
+									usage (argv[0]);
+									err = 1;
+									goto teardown;
+								}
 
-              snprintf (options->structure, MAX_PATH_LEN - 1, "%s", argv[++i]);
-              continue;
-            }
+							snprintf (options->structure, MAX_PATH_LEN - 1, "%s", argv[++i]);
+							continue;
+						}
 
-          if (strncmp (argv[i], "--init", 10) == 0 || strncmp (argv[i], "-i", 10) == 0)
-            {
-              if (argc < i + 2)
-                {
-                  fprintf (stderr, "You need to provide a value for %s.\n\n", argv[i]);
-                  usage (argv[0]);
-                  err = 1;
-                  goto teardown;
-                }
+					if (strncmp (argv[i], "--init", 10) == 0 || strncmp (argv[i], "-i", 10) == 0)
+						{
+							if (argc < i + 2)
+								{
+									fprintf (stderr, "You need to provide a value for %s.\n\n", argv[i]);
+									usage (argv[0]);
+									err = 1;
+									goto teardown;
+								}
 
-              snprintf (options->init, MAX_PATH_LEN - 1, "%s", argv[++i]);
-              continue;
-            }
+							snprintf (options->init, MAX_PATH_LEN - 1, "%s", argv[++i]);
+							continue;
+						}
 
-          if (strncmp (argv[i], "--recreate", 20) == 0)
-            {
-              if (argc < i + 2)
-                {
-                  fprintf (stderr, "You need to provide a value for --recreate.\n\n");
-                  usage (argv[0]);
-                  err = 1;
-                  goto teardown;
-                }
+					if (strncmp (argv[i], "--recreate", 20) == 0)
+						{
+							if (argc < i + 2)
+								{
+									fprintf (stderr, "You need to provide a value for --recreate.\n\n");
+									usage (argv[0]);
+									err = 1;
+									goto teardown;
+								}
 
-              snprintf (options->recreate, MAX_NAME_LEN - 1, "%s", argv[++i]);
-              continue;
-            }
+							snprintf (options->recreate, MAX_NAME_LEN - 1, "%s", argv[++i]);
+							continue;
+						}
 
-          if (strncmp (argv[i], "generate", 10) == 0)
-            {
-              options->command = COMMAND_GENERATE;
-              continue;
-            }
+					if (strncmp (argv[i], "generate", 10) == 0)
+						{
+							options->command = COMMAND_GENERATE;
+							continue;
+						}
 
-          if (strncmp (argv[i], "migrate", 10) == 0)
-            {
-              options->command = COMMAND_MIGRATE;
-              continue;
-            }
+					if (strncmp (argv[i], "migrate", 10) == 0)
+						{
+							options->command = COMMAND_MIGRATE;
+							continue;
+						}
 
-          if (options->command == COMMAND_GENERATE && options->migration_name[0] == 0)
-            {
-              snprintf (options->migration_name, MAX_NAME_LEN - 1, "%s", argv[i]);
-              continue;
-            }
+					if (options->command == COMMAND_GENERATE && options->migration_name[0] == 0)
+						{
+							snprintf (options->migration_name, MAX_NAME_LEN - 1, "%s", argv[i]);
+							continue;
+						}
 
-          err = 1;
-          fprintf (stderr, "Unknown parameter: %s\n\n", argv[i]);
-          usage (argv[0]);
-          goto teardown;
-        }
-    }
+					err = 1;
+					fprintf (stderr, "Unknown parameter: %s\n\n", argv[i]);
+					usage (argv[0]);
+					goto teardown;
+				}
+		}
 
-  if (options->database[0] == 0)
-    snprintf (options->database, MAX_PATH_LEN - 1, "./app.db");
+	if (options->database[0] == 0)
+		snprintf (options->database, MAX_PATH_LEN - 1, "./app.db");
 
-  if (options->migrations[0] == 0)
-    snprintf (options->migrations, MAX_PATH_LEN - 1, "./migrations");
+	if (options->migrations[0] == 0)
+		snprintf (options->migrations, MAX_PATH_LEN - 1, "./migrations");
 
-  if (options->structure[0] == 0)
-    snprintf (options->structure, MAX_PATH_LEN - 1, "./structure.sql");
+	if (options->structure[0] == 0)
+		snprintf (options->structure, MAX_PATH_LEN - 1, "./structure.sql");
 
-  if (options->init[0] == 0)
-    find_init_file (options->init);
+	if (options->init[0] == 0)
+		find_init_file (options->init);
 
-  teardown:
-  return err;
+	teardown:
+	return err;
 }
 
 int
 main (int argc, char **argv)
 {
-  int err = 0;
+	int err = 0;
 
-  options_t options = {0};
-  err = parse_options (argc, argv, &options);
-  if (err)
-    goto teardown;
+	options_t options = {0};
+	err = parse_options (argc, argv, &options);
+	if (err)
+		goto teardown;
 
-  switch (options.command)
-    {
-      case COMMAND_GENERATE:
-        err = generate_migration (&options);
-        if (err)
-          {
-            fprintf (stderr, "main.c: main(): could not generate migration.\n");
-            goto teardown;
-          }
-        break;
+	switch (options.command)
+		{
+			case COMMAND_GENERATE:
+				err = generate_migration (&options);
+				if (err)
+					{
+						fprintf (stderr, "main.c: main(): could not generate migration.\n");
+						goto teardown;
+					}
+				break;
 
-      case COMMAND_MIGRATE:
-        err = migrate (&options);
-        if (err)
-          {
-            fprintf (stderr, "main.c: main(): could not migrate.\n");
-            goto teardown;
-          }
-        break;
+			case COMMAND_MIGRATE:
+				err = migrate (&options);
+				if (err)
+					{
+						fprintf (stderr, "main.c: main(): could not migrate.\n");
+						goto teardown;
+					}
+				break;
 
-      default:
-        fprintf (stderr, "unknown command.\n\n");
-        usage (argv[0]);
-        err = 1;
-        goto teardown;
-    }
+			default:
+				fprintf (stderr, "unknown command.\n\n");
+				usage (argv[0]);
+				err = 1;
+				goto teardown;
+		}
 
-  teardown:
-  close_db ();
-  return err;
+	teardown:
+	close_db ();
+	return err;
 }

@@ -120,3 +120,12 @@ Options can be:
 If you see this project has not been updated in years, it is not a bug, it's a
 feature. Exodus is built on a standard stack with a single rock stable
 dependency, it's meant to last without requiring maintenance.
+
+## AI usage
+
+No line of code in this project has been written by AI. As much as I love
+chatting with LLMs, I enjoy my craft even more.
+
+I do, though, use LLMs to brainstorm, find documentation faster, and review my
+code (still without having them provide code). And crack a joke or two now and
+then.

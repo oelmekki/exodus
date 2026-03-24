@@ -72,6 +72,8 @@ Options can be:\n\
 	-m, --migrations <migrations directory>: use this directory for migrations.\n\
 	-s, --structure <structure file>: use this file for SQL structure.\n\
 	-i, --init <SQL init file>: content of this file will be executed when opening each connection.\n\
+\n\
+Returns 0 on success, non-zero otherwise.\n\
 ", progname, progname);
 }
 

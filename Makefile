@@ -39,6 +39,7 @@ $(BUILD_DIR)/%.o-dev: $(SRC_DIR)/%.c
 
 install: $(BUILD_DIR)/$(PROG)
 	install -D $< $(PREFIX)/bin/$(PROG)
+	install -D ./share/exodus.1 $(PREFIX)/share/man/man1/exodus.1
 
 clean:
 	rm -rf $(BUILD_DIR)

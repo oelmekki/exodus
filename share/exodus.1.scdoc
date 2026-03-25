@@ -61,20 +61,20 @@ the first one existing in this list:
 
 # OPTIONS
 
-	*-h, --help*
-		display this help.
+*-h, --help*
+	display this help.
 
-	*-d, --database* _database file_
-		use this file as database.
+*-d, --database* _database file_
+	use this file as database.
 
-	*-m, --migrations* _migrations directory_
-		use this directory for migrations.
+*-m, --migrations* _migrations directory_
+	use this directory for migrations.
 
-	*-s, --structure* _structure file_
-		use this file for SQL structure.
+*-s, --structure* _structure file_
+	use this file for SQL structure.
 
-	*-i, --init* _SQL init file_
-		content of this file will be executed when opening each connection.
+*-i, --init* _SQL init file_
+	content of this file will be executed when opening each connection.
 
 # RETURN STATUS
 

@@ -10,6 +10,9 @@ are:
   triggers and indexes) when the change you want to make can't be done with
   `ALTER TABLE`.
 
+> Update: as of 3.53.0, SQLite
+> [now supports changing NOT NULL and CHECK with ALTER TABLE](https://sqlite.org/releaselog/3_53_0.html)!
+
 ## Dependencies
 
 Exodus' only dependency is SQLite.

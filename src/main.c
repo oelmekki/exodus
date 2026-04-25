@@ -13,17 +13,18 @@ usage (const char progname[static 1])
 {
 	printf ("\
 %s [options] generate <migration name> [--recreate <table>]\n\
-%s [options] migrate\n\
+%s [options] migrate [--transaction]\n\
 \n\
 Exodus is a SQLite database migration tool.\n\
 \n\
-When using the `generate` subcommand, you specify a migration name (not a path),\n\
-and it will create an SQL file in the migrations directory with that name, appending\n\
-the `.sql` suffix and the current timestamp as prefix. The default migrations\n\
-directory is `./migrations/`. You can change it with the `--migrations` option.\n\
+When using the `generate` subcommand, you specify a migration name (not \n\
+a path), and it will create an SQL file in the migrations directory \n\
+with that name, appending the `.sql` suffix and the current timestamp \n\
+as prefix. The default migrations directory is `./migrations/`. You \n\
+can change it with the `--migrations` option.\n\
 \n\
-If you specify a table name with the `--recreate` option, the migration file will\n\
-be prefilled to:\n\
+If you specify a table name with the `--recreate` option, the migration \n\
+file will be prefilled to:\n\
 \n\
 - drop triggers, indexes and views using that table\n\
 - rename that table\n\
@@ -32,33 +33,46 @@ be prefilled to:\n\
 - drop the old table\n\
 - recreate the triggers, indexes and views for the new table\n\
 \n\
-This will allow you to change in your table things that can only be changed by\n\
-recreating it, like for example the `CHECK` constraints.\n\
+This will allow you to change in your table things that can only be \n\
+changed by recreating it, like for example the `CHECK` constraints.\n\
 \n\
-When using the `migrate` subcommand, exodus will run the pending migrations on\n\
-the database. The migrations directory is determined as for `generate`. The default\n\
-database file is `./app.db`. You can change it with the `--database` option.\n\
+When using the `migrate` subcommand, exodus will run the pending \n\
+migrations on the database. The migrations directory is determined \n\
+as for `generate`. The default database file is `./app.db`. You can \n\
+change it with the `--database` option.\n\
 \n\
-`migrate` will create the `migrations` table in your database if it doesn't exist\n\
-yet, and will execute every migration from the migrations directory that are not\n\
-already referenced in this table, in alphabetical order. It will save the previous\n\
-database as `<db name>.prev`, and if the migration fails, it will restore that\n\
-previous database, and save the failed one as `<db name>.failed`. In case of success,\n\
-it will dump the current structure in the structure file, which is `./structure.sql`\n\
-by default, and can be changed with the `--structure` option.\n\
+`migrate` will create the `migrations` table in your database if \n\
+it doesn't exist yet, and will execute every migration from the \n\
+migrations directory that are not already referenced in this table, \n\
+in alphabetical order.\n\
 \n\
-A migration file can either be a SQL file, or an executable. Executables will be\n\
-executed once, provided they return a 0 status. Non zero status will be considered\n\
-as a failure at applying the migration. The point of running those executables is\n\
-to allow your migration to compute data changes, rather than hardcoding them. Your\n\
-executable will be passed the database path as first parameter, but beside that,\n\
-you're on your own. It's your responsibility to make that executable connect to\n\
-the database and do whatever it wants with it.\n\
+Unless `--transaction` is specified, it will save the previous database \n\
+as `<db name>.prev`, and if the migration fails, it will restore that \n\
+previous database, and save the failed one as `<db name>.failed`.\n\
 \n\
-You can provide SQL code that will be called every time a connection is open\n\
-(at the start of the program and after each migration has ran, ensuring it runs once\n\
-per migration). This can be typically used to set up your PRAGMAs. The file used is\n\
-the first one existing in this list:\n\
+If `--transaction` is specified, it will instead wrap the migration \n\
+in a transaction and roll it back in case of error. Please note, \n\
+though, that this can't be done if you use an executable instead of \n\
+a SQL file for your migration, so you will need to handle rollback \n\
+yourself in your executables if you use the `--transaction` flag.\n\
+\n\
+In case of success, it will dump the current structure in the structure \n\
+file, which is `./structure.sql` by default, and can be changed with \n\
+the `--structure` option.\n\
+\n\
+A migration file can either be a SQL file, or an \n\
+executable. Executables will be executed once, provided they return a \n\
+0 status. Non zero status will be considered as a failure at applying \n\
+the migration. The point of running those executables is to allow your \n\
+migration to compute data changes, rather than hardcoding them. Your \n\
+executable will be passed the database path as first parameter, but \n\
+beside that, you're on your own. It's your responsibility to make that \n\
+executable connect to the database and do whatever it wants with it.\n\
+\n\
+You can provide SQL code that will be called every time a connection \n\
+is open (at the start of the program and after each migration has ran, \n\
+ensuring it runs once per migration). This can be typically used to set \n\
+up your PRAGMAs. The file used is the first one existing in this list:\n\
 \n\
 - something provided by the `--init` option\n\
 - $XDG_CONFIG_HOME/exodus-init.sql\n\
@@ -196,6 +210,12 @@ parse_options (int argc, char **argv, options_t options[static 1])
 								}
 
 							snprintf (options->recreate, MAX_NAME_LEN - 1, "%s", argv[++i]);
+							continue;
+						}
+
+					if (strncmp (argv[i], "--transaction", 20) == 0)
+						{
+							options->use_transactions = true;
 							continue;
 						}
 

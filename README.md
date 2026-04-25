@@ -4,7 +4,7 @@ Exodus allows you to create and apply migrations for SQLite. Its main features
 are:
 
 - applying only migrations not yet applied to the database
-- creating a backup database and restoring it in case there's an error during migration
+- creating a backup database and restoring it in case there's an error during migration (optionally using transactions instead)
 - allowing migrations to be both SQL files or (any language) executables
 - generating boilerplate to recreate a table (and all the related views,
   triggers and indexes) when the change you want to make can't be done with

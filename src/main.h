@@ -13,6 +13,7 @@ typedef struct {
 	char init[MAX_PATH_LEN];
 	char recreate[MAX_NAME_LEN];
 	char migration_name[MAX_NAME_LEN];
+	bool use_transactions;
 	int command;
 } options_t;
 

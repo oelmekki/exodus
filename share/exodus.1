@@ -5,7 +5,7 @@
 .nh
 .ad l
 .\" Begin generated content:
-.TH "EXODUS" "1" "2026-03-25"
+.TH "EXODUS" "1" "2026-04-25"
 .PP
 .SH NAME
 .PP
@@ -15,17 +15,18 @@ exodus - SQLite database migration tool
 .PP
 \fBexodus\fR [\fIoptions\fR] \fBgenerate\fR \fImigration name\fR [\fB--recreate\fR \fItable\fR] 
 .br
-\fBexodus\fR [\fIoptions\fR] \fBmigrate\fR
+\fBexodus\fR [\fIoptions\fR] \fBmigrate\fR [\fB--transaction\fR]
 .PP
 .SH DESCRIPTION
 .PP
-When using the \fBgenerate\fR subcommand, you specify a migration name (not a path),
-and it will create an SQL file in the migrations directory with that name, appending
-the \fI.\&sql\fR suffix and the current timestamp as prefix.\& The default migrations
-directory is \fI.\&/migrations/\fR.\& You can change it with the \fB--migrations\fR option.\&
+When using the \fBgenerate\fR subcommand, you specify a migration name (not 
+a path), and it will create an SQL file in the migrations directory 
+with that name, appending the \fI.\&sql\fR suffix and the current timestamp 
+as prefix.\& The default migrations directory is \fI.\&/migrations/\fR.\& You 
+can change it with the \fB--migrations\fR option.\&
 .PP
-If you specify a table name with the \fB--recreate\fR option, the migration file will
-be prefilled to:
+If you specify a table name with the \fB--recreate\fR option, the migration 
+file will be prefilled to:
 .PP
 .PD 0
 .IP \(bu 4
@@ -42,43 +43,56 @@ drop the old table
 recreate the triggers, indexes and views for the new table
 .PD
 .PP
-This will allow you to change in your table things that can only be changed by
-recreating it, like for example the \fICHECK\fR constraints.\&
+This will allow you to change in your table things that can only be 
+changed by recreating it, like for example the \fICHECK\fR constraints.\&
 .PP
-When using the \fBmigrate\fR subcommand, exodus will run the pending migrations on
-the database.\& The migrations directory is determined as for \fBgenerate\fR.\& The default
-database file is \fI.\&/app.\&db\fR.\& You can change it with the \fB--database\fR option.\&
+When using the \fBmigrate\fR subcommand, exodus will run the pending 
+migrations on the database.\& The migrations directory is determined 
+as for \fBgenerate\fR.\& The default database file is \fI.\&/app.\&db\fR.\& You can 
+change it with the \fB--database\fR option.\&
 .PP
-\fBmigrate\fR will create the \fImigrations\fR table in your database if it doesn'\&t exist
-yet, and will execute every migration from the migrations directory that are not
-already referenced in this table, in alphabetical order.\& It will save the previous
-database as \fI<db name>.\&prev\fR, and if the migration fails, it will restore that
-previous database, and save the failed one as \fI<db name>.\&failed\fR.\& In case of success,
-it will dump the current structure in the structure file, which is \fI.\&/structure.\&sql\fR
-by default, and can be changed with the \fI--structure\fR option.\&
+\fBmigrate\fR will create the \fImigrations\fR table in your database if 
+it doesn'\&t exist yet, and will execute every migration from the 
+migrations directory that are not already referenced in this table, 
+in alphabetical order.\&
 .PP
-A migration file can either be a SQL file, or an executable.\& Executables will be
-executed once, provided they return a 0 status.\& Non zero status will be considered
-as a failure at applying the migration.\& The point of running those executables is
-to allow your migration to compute data changes, rather than hardcoding them.\& Your
-executable will be passed the database path as first parameter, but beside that,
-you'\&re on your own.\& It'\&s your responsibility to make that executable connect to
-the database and do whatever it wants with it.\&
+Unless \fB--transaction\fR is specified, it will save the previous database 
+as \fI<db name>.\&prev\fR, and if the migration fails, it will restore that 
+previous database, and save the failed one as \fI<db name>.\&failed\fR.\&
 .PP
-You can provide SQL code that will be called every time a connection is open
-(at the start of the program and after each migration has ran, ensuring it runs once
-per migration).\& This can be typically used to set up your PRAGMAs.\& The file used is
-the first one existing in this list:
+If \fB--transaction\fR is specified, it will instead wrap the migration 
+in a transaction and roll it back in case of error.\& Please note, 
+though, that this can'\&t be done if you use an executable instead of 
+a SQL file for your migration, so you will need to handle rollback 
+yourself in your executables if you use the \fB--transaction\fR flag.\&
+.PP
+In case of success, it will dump the current structure in the structure 
+file, which is \fI.\&/structure.\&sql\fR by default, and can be changed with 
+the \fB--structure\fR option.\&
+.PP
+A migration file can either be a SQL file, or an 
+executable.\& Executables will be executed once, provided they return a 
+0 status.\& Non zero status will be considered as a failure at applying 
+the migration.\& The point of running those executables is to allow your 
+migration to compute data changes, rather than hardcoding them.\& Your 
+executable will be passed the database path as first parameter, but 
+beside that, you'\&re on your own.\& It'\&s your responsibility to make that 
+executable connect to the database and do whatever it wants with it.\&
+.PP
+You can provide SQL code that will be called every time a connection 
+is open (at the start of the program and after each migration has ran, 
+ensuring it runs once per migration).\& This can be typically used to set 
+up your \fIPRAGMAs\fR.\& The file used is the first one existing in this list:
 .PP
 .PD 0
 .IP \(bu 4
-something provided by the \fI--init\fR option
+something provided by the \fB--init\fR option
 .IP \(bu 4
-$XDG_CONFIG_HOME/exodus-init.\&sql
+\fI$XDG_CONFIG_HOME/exodus-init.\&sql\fR
 .IP \(bu 4
-$HOME/.\&config/exodus-init.\&sql
+\fI$HOME/.\&config/exodus-init.\&sql\fR
 .IP \(bu 4
-/etc/exodus-init.\&sql
+\fI/etc/exodus-init.\&sql\fR
 .PD
 .PP
 .SH OPTIONS
@@ -88,22 +102,22 @@ $HOME/.\&config/exodus-init.\&sql
 display this help.\&
 .PP
 .RE
-\fB-d, --database\fR \fIdatabase file\fR
+\fB-d, --database\fR \fI<database file>\fR
 .RS 4
 use this file as database.\&
 .PP
 .RE
-\fB-m, --migrations\fR \fImigrations directory\fR
+\fB-m, --migrations\fR \fI<migrations directory>\fR
 .RS 4
 use this directory for migrations.\&
 .PP
 .RE
-\fB-s, --structure\fR \fIstructure file\fR
+\fB-s, --structure\fR \fI<structure file>\fR
 .RS 4
 use this file for SQL structure.\&
 .PP
 .RE
-\fB-i, --init\fR \fISQL init file\fR
+\fB-i, --init\fR \fI<SQL init file>\fR
 .RS 4
 content of this file will be executed when opening each connection.\&
 .PP

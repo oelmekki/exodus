@@ -103,7 +103,7 @@ find_migration_files (const char migrations_dir[MAX_PATH_LEN], struct dirent ***
 }
 
 static int
-apply_sql_migration (const char migration_file[MAX_PATH_LEN])
+apply_sql_migration (const char migration_file[MAX_PATH_LEN], bool use_transactions)
 {
 	int err = 0;
 	FILE *file = NULL;
@@ -145,16 +145,41 @@ apply_sql_migration (const char migration_file[MAX_PATH_LEN])
 			goto teardown;
 		}
 
+	if (use_transactions)
+		{
+			err = db_exec ("SAVEPOINT exodus_transaction");
+			if (err)
+				{
+					fprintf (stderr, "migrate.c: apply_sql_migration(): could not create savepoint for migration: %s\n", migration_file);
+					goto teardown;
+				}
+		}
+
 	err = db_exec (sql);
 	if (err)
 		{
 			fprintf (stderr, "migrate.c: apply_sql_migration(): could not execute migration: %s\n", migration_file);
+
+			if (use_transactions)
+				db_exec ("ROLLBACK TO SAVEPOINT exodus_transaction");
+
 			goto teardown;
 		}
 
 	teardown:
 	if (file) fclose (file);
 	if (sql) free (sql);
+
+	if (use_transactions)
+		{
+			int err2 = db_exec ("RELEASE exodus_transaction");
+			if (err2 && !err)
+				{
+					err = 1;
+					fprintf (stderr, "migrate.c: apply_sql_migration(): could not commit transaction for migration: %s\n", migration_file);
+				}
+		}
+
 	return err;
 }
 
@@ -349,11 +374,14 @@ migrate (options_t *options)
 	if (migration_files_len == 0)
 		goto teardown;
 
-	err = backup_db (options->database, backup_file);
-	if (err)
+	if (!options->use_transactions)
 		{
-			fprintf (stderr, "migrate.c: migrate(): can't backup database.\n");
-			goto teardown;
+			err = backup_db (options->database, backup_file);
+			if (err)
+				{
+					fprintf (stderr, "migrate.c: migrate(): can't backup database.\n");
+					goto teardown;
+				}
 		}
 
 	for (size_t i = 0; i < migration_files_len; i++)
@@ -374,7 +402,7 @@ migrate (options_t *options)
 
 			if (strnlen (migration_file, MAX_PATH_LEN) > 4 && strncmp (migration_file + strnlen (migration_file, MAX_PATH_LEN) - 4, ".sql", MAX_PATH_LEN) == 0)
 				{
-					err = apply_sql_migration (migration_path);
+					err = apply_sql_migration (migration_path, options->use_transactions);
 					if (err)
 						{
 							should_restore_db = true;
@@ -437,7 +465,7 @@ migrate (options_t *options)
 			free (migration_files);
 		}
 
-	if (should_restore_db)
+	if (!options->use_transactions && should_restore_db)
 		{
 			int err = backup_db (options->database, fail_file);
 			if (err)

@@ -110,7 +110,7 @@ find_table_sql (char *sql[static 1], const char table_name[MAX_NAME_LEN])
 {
 	int err = 0;
 	sqlite3_stmt *stmt = NULL;
-	char query[BUFSIZ] = "SELECT sql FROM sqlite_schema WHERE type='table' AND name = ?";
+	char query[KIKSTRL] = "SELECT sql FROM sqlite_schema WHERE type='table' AND name = ?";
 
 	int rc = sqlite3_prepare_v2 (db, query, -1, &stmt, NULL);
 	if (rc != SQLITE_OK)
@@ -173,7 +173,7 @@ find_triggers (database_object_t **triggers, const char table_name[MAX_NAME_LEN]
 {
 	int err = 0;
 	sqlite3_stmt *stmt = NULL;
-	char query[BUFSIZ] = "SELECT name, sql FROM sqlite_schema WHERE type = 'trigger' AND (sql LIKE ? OR sql LIKE ? OR sql LIKE ? OR sql LIKE ?)";
+	char query[KIKSTRL] = "SELECT name, sql FROM sqlite_schema WHERE type = 'trigger' AND (sql LIKE ? OR sql LIKE ? OR sql LIKE ? OR sql LIKE ?)";
 	char pattern_1[MAX_NAME_LEN + 4] = {0};
 	char pattern_2[MAX_NAME_LEN + 4] = {0};
 	char pattern_3[MAX_NAME_LEN + 4] = {0};
@@ -252,7 +252,7 @@ find_views (database_object_t **views, const char table_name[MAX_NAME_LEN], size
 {
 	int err = 0;
 	sqlite3_stmt *stmt = NULL;
-	char query[BUFSIZ] = "SELECT name, sql FROM sqlite_schema WHERE type = 'view' AND (sql LIKE ? OR sql LIKE ? OR sql LIKE ? OR sql LIKE ?)";
+	char query[KIKSTRL] = "SELECT name, sql FROM sqlite_schema WHERE type = 'view' AND (sql LIKE ? OR sql LIKE ? OR sql LIKE ? OR sql LIKE ?)";
 	char pattern_1[MAX_NAME_LEN + 4] = {0};
 	char pattern_2[MAX_NAME_LEN + 4] = {0};
 	char pattern_3[MAX_NAME_LEN + 4] = {0};
@@ -331,7 +331,7 @@ find_indexes (database_object_t **indexes, const char table_name[MAX_NAME_LEN], 
 {
 	int err = 0;
 	sqlite3_stmt *stmt = NULL;
-	char query[BUFSIZ] = "SELECT name, sql FROM sqlite_schema WHERE type = 'index' AND (sql LIKE ? OR sql LIKE ? OR sql LIKE ? OR sql LIKE ?)";
+	char query[KIKSTRL] = "SELECT name, sql FROM sqlite_schema WHERE type = 'index' AND (sql LIKE ? OR sql LIKE ? OR sql LIKE ? OR sql LIKE ?)";
 	char pattern_1[MAX_NAME_LEN + 4] = {0};
 	char pattern_2[MAX_NAME_LEN + 4] = {0};
 	char pattern_3[MAX_NAME_LEN + 4] = {0};

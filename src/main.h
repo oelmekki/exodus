@@ -1,6 +1,10 @@
 #ifndef _MAIN_H_
 #define _MAIN_H_
 
+#define KIKSTRS 100
+#define KIKSTRM 1000
+#define KIKSTRL 8000
+
 #define MAX_PATH_LEN 2000
 #define MAX_NAME_LEN 200
 #define MAX_FILE_LEN 5 * 1024 * 1024 // 5MB

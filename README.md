@@ -21,7 +21,7 @@ Exodus' only dependency is SQLite.
 
 To build exodus, you will need a few dev tools:
 
-- make
+- gmake
 - gcc or clang (or anything compatible)
 - pkg-config
 
@@ -34,22 +34,22 @@ sudo apt install libsqlite3-dev
 ## Build and installation
 
 ```
-make
-sudo make install
+gmake
+sudo gmake install
 ```
 
 It will be installed in `$PREFIX/bin`, which is by default `/usr/local/bin`. You
 can change the PREFIX variable like this:
 
 ```
-make
-sudo make install PREFIX=/usr
+gmake
+sudo gmake install PREFIX=/usr
 ```
 
-It uses gcc by default. To use an other compiler, such as clang:
+It uses the compiler defined as cc by default. To specify a compiler:
 
 ```
-make CC=clang
+gmake CC=clang
 sudo make install
 ```
 

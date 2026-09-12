@@ -1,5 +1,5 @@
-PROG			= exodus
-CC        = gcc
+PROG      = exodus
+CC        = cc
 SRC_DIR   = src
 BUILD_DIR = build
 PREFIX    = /usr/local
@@ -27,7 +27,7 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 	$(CC) $(KIK_PROD_CFLAGS) $(CFLAGS) -c $< -o $@
 
 dev: $(BUILD_DIR)/$(PROG)-dev
-	@which ctags &>/dev/null && ctags --kinds-C=+p $(FILES) $(wildcard $(SRC_DIR)/**/*.h) $(wildcard $(SRC_DIR)/*.h) $(shell gcc -M $(FILES) $(CFLAGS) $(LIBS) | sed -e 's/[\\ ]/\n/g' | sed -e '/^$$/d' -e '/\.o:[ \t]*$$/d' | sort | uniq) || exit 0
+	@which ctags &>/dev/null && ctags $(FILES) || exit 0
 
 $(BUILD_DIR)/$(PROG)-dev: $(OBJDEV)
 	@mkdir -p $(dir $@)
@@ -38,8 +38,9 @@ $(BUILD_DIR)/%.o-dev: $(SRC_DIR)/%.c
 	$(CC) $(KIK_DEV_CFLAGS) $(CFLAGS) -c $< -o $@
 
 install: $(BUILD_DIR)/$(PROG)
-	install -D $< $(PREFIX)/bin/$(PROG)
-	install -D ./share/exodus.1 $(PREFIX)/share/man/man1/exodus.1
+	install $< $(PREFIX)/bin/$(PROG)
+	mkdir -p $(PREFIX)/share/man/man1/
+	install ./share/exodus.1 $(PREFIX)/share/man/man1/exodus.1
 
 clean:
 	rm -rf $(BUILD_DIR)

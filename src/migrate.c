@@ -34,7 +34,7 @@ find_last_migration_applied ()
 {
 	int err = 0;
 	sqlite3_stmt *stmt = NULL;
-	char query[BUFSIZ] = "SELECT name FROM migrations ORDER BY name DESC LIMIT 1";
+	char query[KIKSTRL] = "SELECT name FROM migrations ORDER BY name DESC LIMIT 1";
 
 	err = db_exec ("CREATE TABLE IF NOT EXISTS migrations(name TEXT NOT NULL)");
 	if (err)
@@ -229,7 +229,7 @@ append_name_in_migrations_table (const char migration_file[MAX_NAME_LEN])
 {
 	int err = 0;
 	sqlite3_stmt *stmt = NULL;
-	char query[BUFSIZ] = "INSERT INTO migrations(name) VALUES (?)";
+	char query[KIKSTRL] = "INSERT INTO migrations(name) VALUES (?)";
 
 	int rc = sqlite3_prepare_v2 (db, query, -1, &stmt, NULL);
 	if (rc != SQLITE_OK)
@@ -267,7 +267,7 @@ dump_structure (const char *structure_path, const char *migration_file)
 {
 	int err = 0;
 	sqlite3_stmt *stmt = NULL;
-	char query[BUFSIZ] = "SELECT sql FROM sqlite_schema WHERE sql IS NOT NULL ORDER BY rowid";
+	char query[KIKSTRL] = "SELECT sql FROM sqlite_schema WHERE sql IS NOT NULL ORDER BY rowid";
 	FILE *file = NULL;
 
 	file = fopen (structure_path, "w");
